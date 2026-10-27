@@ -174,6 +174,6 @@ for f in "${GOOD[@]}"; do check good "$f"; done
 for f in "${BAD[@]}"; do check bad "$f"; done
 ls -lR "$OUT/previews" >>"$LOG" 2>&1
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then printf "%b" "$summary" >>"$GITHUB_STEP_SUMMARY"; fi
-printf "%b" "$summary"
+printf "%b" "$summary" | tee "$OUT/summary.md"
 head -n 400 "$LOG"
 exit "$failed"

@@ -87,18 +87,6 @@ jobs:
       - name: Thumbnails
         run: packaging/macos/quicklook/check-thumbnails.sh "$PWD/docs-in" "$PWD/out" "$PWD/target/aarch64-apple-darwin/release/examples/ql_probe"
 
-      # The probe's thumbnails of the good documents as base64 between markers, so they can be
-      # read from the job log where the artifact can't be downloaded.
-      - name: Thumbnails as text
-        if: always()
-        run: |
-          for f in out/probe/*.png; do
-            [ -f "$f" ] || continue
-            echo "-----BEGIN THUMBNAIL $(basename "$f")-----"
-            base64 -i "$f" | fold -w 120
-            echo "-----END THUMBNAIL $(basename "$f")-----"
-          done
-
       # What the system made of the extensions, for a failed (or puzzling) run: the registrations
       # pluginkit knows of (rejected ones too), errors from the processes that load them, and any
       # crash reports.
@@ -132,6 +120,23 @@ jobs:
           mkdir -p out
           log show --predicate 'subsystem contains "quicklook" OR process contains "VectorCraft" OR eventMessage contains "ai.storyteller.vectorcraft"' --last 15m --info --debug >out/quicklook.log 2>&1 || true
           tail -n 200 out/quicklook.log
+
+      # Last, so it stays in the part of the job log that tools showing only its end can read:
+      # the thumbnail table, and the probe's thumbnails as small JPEGs in base64 between markers.
+      - name: Summary and thumbnails as text
+        if: always()
+        run: |
+          cat out/summary.md 2>/dev/null || true
+          grep -E "save \.vectorcraft|open \.vectorcraft|performance budgets" out/perf.txt 2>/dev/null || true
+          mkdir -p out/small
+          for f in out/probe/*.png; do
+            [ -f "$f" ] || continue
+            small="out/small/$(basename "$f" .png).jpg"
+            sips -s format jpeg -s formatOptions 70 -Z 256 "$f" --out "$small" >/dev/null
+            echo "-----BEGIN THUMBNAIL $(basename "$small")-----"
+            base64 -i "$small" | fold -w 120
+            echo "-----END THUMBNAIL $(basename "$small")-----"
+          done
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
