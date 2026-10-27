@@ -68,3 +68,15 @@ objc2-uniform-type-identifiers = { version = "0.3", default-features = false, fe
 
 [dev-dependencies]
 vectorcraft-geom = { workspace = true }
+
+# examples/ql_probe.rs: asks Quick Look for thumbnails as Finder does (the macOS workflow).
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+objc2-quick-look-thumbnailing = { version = "0.3", default-features = false, features = [
+  "std",
+  "block2",
+  "objc2-core-foundation",
+  "objc2-uniform-type-identifiers",
+  "QLThumbnailGenerationRequest",
+  "QLThumbnailGenerator",
+  "QLThumbnailRepresentation",
+] }

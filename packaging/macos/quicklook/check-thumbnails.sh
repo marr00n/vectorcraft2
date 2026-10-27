@@ -1,40 +1,46 @@
 #!/usr/bin/env bash
 # Have Quick Look make a 512-pixel thumbnail of each document make-test-files.sh wrote, with the
-# installed VectorCraft.app's extension (.github/workflows/quicklook-macos.yml).
+# installed VectorCraft.app's extension (.github/workflows/quicklook-macos.yml), two ways:
+# `qlmanage -t -s 512` and examples/ql_probe.rs, which asks QuickLookThumbnailing as Finder does
+# (`qlmanage -t` doesn't always reach app-extension thumbnailers on current macOS; a plain PNG is
+# run through it first as a control).
 #
-# Usage: packaging/macos/quicklook/check-thumbnails.sh DOCS_DIR OUT_DIR
+# Usage: packaging/macos/quicklook/check-thumbnails.sh DOCS_DIR OUT_DIR PROBE
 #
-# Fails when a good document gets no thumbnail (or one without the document's colours), or when
-# Quick Look takes longer than $QL_TIMEOUT seconds (default 60) on any document. Thumbnails go to
-# OUT_DIR/thumbnails, qlmanage's output to OUT_DIR/qlmanage.txt; a summary is printed (and added to
-# the job summary on GitHub Actions). Space-bar previews are tried too (qlmanage -p -o), for the
-# record only: what qlmanage writes for a data-based preview isn't documented.
+# Fails when a good document gets no thumbnail either way (or one without the document's colours),
+# or when the probe gets no answer within $QL_TIMEOUT seconds (default 60) on any document; so does
+# qlmanage taking that long, unless it also does on the control. Thumbnails go to
+# OUT_DIR/thumbnails (qlmanage) and OUT_DIR/probe, qlmanage's output to OUT_DIR/qlmanage.txt; a
+# summary is printed (and added to the job summary on GitHub Actions). Space-bar previews are tried
+# too (qlmanage -p -o), for the record only.
 set -uo pipefail
 DOCS="$1"
 OUT="$2"
+PROBE="$3"
 TIMEOUT="${QL_TIMEOUT:-60}"
 THUMBS="$OUT/thumbnails"
-mkdir -p "$THUMBS" "$OUT/previews"
+PROBED="$OUT/probe"
+mkdir -p "$THUMBS" "$PROBED" "$OUT/previews"
 LOG="$OUT/qlmanage.txt"
 : >"$LOG"
 
 GOOD=(with-preview.vectorcraft compressed.vectorcraft legacy.drawcraft large.vectorcraft)
 BAD=(no-preview.vectorcraft too-new.vectorcraft corrupt.vectorcraft garbage.vectorcraft bomb.vectorcraft)
 
-# Run "$@" for at most $1 seconds; 124 when it had to be killed.
+# Run "$@" for at most $1 seconds of wall-clock time; 124 when it had to be killed.
 within() {
-  local secs="$1" pid ticks=0
+  local secs="$1" pid deadline
   shift
   "$@" >>"$LOG" 2>&1 &
   pid=$!
+  deadline=$((SECONDS + secs))
   while kill -0 "$pid" 2>/dev/null; do
-    if ((ticks >= secs * 10)); then
+    if ((SECONDS >= deadline)); then
       kill -9 "$pid" 2>/dev/null
       wait "$pid" 2>/dev/null
       return 124
     fi
-    sleep 0.1
-    ticks=$((ticks + 1))
+    sleep 0.2
   done
   wait "$pid"
 }
@@ -86,38 +92,78 @@ PY
 }
 
 failed=0
-summary="| document | kind | result | seconds |\n|---|---|---|---|\n"
+summary="| document | kind | qlmanage -t | probe (QLThumbnailGenerator) | seconds |\n|---|---|---|---|---|\n"
+
+# The control: does qlmanage -t answer for a plain PNG on this machine?
+python3 - "$OUT/control.png" <<'PY'
+import struct, sys, zlib
+w = h = 64
+rows = b"".join(b"\0" + bytes((40, 160, 90)) * w for _ in range(h))
+def chunk(kind, data):
+    return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+open(sys.argv[1], "wb").write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(rows)) + chunk(b"IEND", b""))
+PY
+mkdir -p "$OUT/control"
+echo "== qlmanage -t -s 512 control.png" >>"$LOG"
+within "$TIMEOUT" qlmanage -t -s 512 -o "$OUT/control" "$OUT/control.png"
+control=$?
+if [[ "$control" = 124 ]]; then
+  QLMANAGE_HANGS=1
+  echo "qlmanage -t got no answer for a plain PNG either (the control): its hangs are not held against the extension"
+else
+  QLMANAGE_HANGS=0
+  echo "control: qlmanage -t answered for a plain PNG (exit $control; thumbnail: $(find "$OUT/control" -type f -name '*.png' | tr '\n' ' '))"
+fi
+summary+="| control.png | control | $([[ $control = 124 ]] && echo "no answer in ${TIMEOUT}s" || echo "exit $control") | | |\n"
+
 check() {
-  local kind="$1" name="$2" doc="$DOCS/$2" png="$THUMBS/$2.png" start status result
-  start=$(date +%s)
+  local kind="$1" name="$2" doc="$DOCS/$2" png="$THUMBS/$2.png" probed="$PROBED/$2.png" start status pstatus ql probe
+  start=$SECONDS
   echo "== qlmanage -t -s 512 $name" >>"$LOG"
   within "$TIMEOUT" qlmanage -t -s 512 -o "$THUMBS" "$doc"
   status=$?
-  local took=$(($(date +%s) - start))
-  if [[ "$status" = 124 ]]; then
-    result="HUNG (killed after ${TIMEOUT}s)"
+  echo "== ql_probe $name" >>"$LOG"
+  within "$((TIMEOUT + 5))" "$PROBE" "$doc" "$probed" 512 "$TIMEOUT"
+  pstatus=$?
+  local took=$((SECONDS - start))
+  describe() {
+    if [[ -s "$1" ]]; then
+      echo "thumbnail $(sips -g pixelWidth -g pixelHeight "$1" 2>/dev/null | awk '/pixel/ {printf "%s ", $2}')"
+    elif [[ "$2" = 124 ]]; then
+      echo "NO ANSWER in ${TIMEOUT}s"
+    else
+      echo "none (exit $2)"
+    fi
+  }
+  ql="$(describe "$png" "$status")"
+  probe="$(describe "$probed" "$pstatus")"
+  # The probe's own timeout gives 124 too.
+  if [[ "$pstatus" = 124 ]]; then
     failed=1
-  elif [[ -s "$png" ]]; then
-    result="thumbnail $(sips -g pixelWidth -g pixelHeight "$png" 2>/dev/null | awk '/pixel/ {printf "%s ", $2}')"
-    if [[ "$kind" = good && "$name" = with-preview.vectorcraft ]] && ! has_colours "$png" "#d0402c" "#2c74d0" >>"$LOG" 2>&1; then
-      result="$result, WITHOUT the document's colours"
+  fi
+  if [[ "$status" = 124 && "$QLMANAGE_HANGS" = 0 ]]; then
+    failed=1
+  fi
+  if [[ "$kind" = good ]]; then
+    local shown=""
+    [[ -s "$probed" ]] && shown="$probed"
+    [[ -z "$shown" && -s "$png" ]] && shown="$png"
+    if [[ -z "$shown" ]]; then
+      probe="$probe — NO THUMBNAIL"
+      failed=1
+    elif [[ "$name" = with-preview.vectorcraft ]] && ! has_colours "$shown" "#d0402c" "#2c74d0" >>"$LOG" 2>&1; then
+      probe="$probe — WITHOUT the document's colours"
       failed=1
     fi
-  elif [[ "$kind" = good ]]; then
-    result="NO THUMBNAIL"
-    failed=1
-  else
-    result="no thumbnail (the icon shows)"
   fi
-  echo "$name ($kind): $result in ${took}s (qlmanage exit $status)"
-  summary+="| $name | $kind | $result | $took |\n"
+  echo "$name ($kind): qlmanage $ql; probe $probe; ${took}s"
+  summary+="| $name | $kind | $ql | $probe | $took |\n"
   # The Space-bar preview, for the record.
   echo "== qlmanage -p -o $name" >>"$LOG"
   within "$TIMEOUT" qlmanage -p -o "$OUT/previews" "$doc"
   if [[ $? = 124 ]]; then
-    echo "$name: the preview HUNG (killed after ${TIMEOUT}s)"
-    summary+="| $name | preview | HUNG | |\n"
-    failed=1
+    echo "$name: the preview got no answer in ${TIMEOUT}s"
+    summary+="| $name | preview | no answer in ${TIMEOUT}s | | |\n"
   fi
 }
 
@@ -126,5 +172,5 @@ for f in "${BAD[@]}"; do check bad "$f"; done
 ls -lR "$OUT/previews" >>"$LOG" 2>&1
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then printf "%b" "$summary" >>"$GITHUB_STEP_SUMMARY"; fi
 printf "%b" "$summary"
-cat "$LOG"
+head -n 400 "$LOG"
 exit "$failed"

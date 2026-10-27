@@ -32,9 +32,17 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: quicklook-macos
+          # The build is most of the job: keep it for the next run even when a check fails.
+          cache-on-failure: true
 
       - name: Build and package (ad-hoc signed)
         run: packaging/macos/package.sh --arch aarch64
+
+      # Asks Quick Look for thumbnails as Finder does (crates/quicklook/examples/ql_probe.rs).
+      - name: Build the thumbnail probe
+        env:
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+        run: cargo build --release --locked -p vectorcraft-quicklook --example ql_probe --target aarch64-apple-darwin
 
       - name: Inspect the extensions' bundles and signatures
         run: |
@@ -77,7 +85,28 @@ jobs:
         run: packaging/macos/quicklook/make-test-files.sh target/macos-package/bin/vectorcraft-cli "$PWD/docs-in"
 
       - name: Thumbnails
-        run: packaging/macos/quicklook/check-thumbnails.sh "$PWD/docs-in" "$PWD/out"
+        run: packaging/macos/quicklook/check-thumbnails.sh "$PWD/docs-in" "$PWD/out" "$PWD/target/aarch64-apple-darwin/release/examples/ql_probe"
+
+      # What the system made of the extensions, for a failed (or puzzling) run: the registrations
+      # pluginkit knows of (rejected ones too), errors from the processes that load them, and any
+      # crash reports.
+      - name: Extension diagnostics
+        if: always()
+        run: |
+          mkdir -p out
+          {
+            for id in ai.storyteller.vectorcraft.thumbnail ai.storyteller.vectorcraft.preview; do
+              echo "== pluginkit -m -A -D -v -i $id"
+              pluginkit -m -A -D -v -i "$id" || true
+            done
+            echo "== log: errors and VectorCraft mentions"
+            log show --last 30m --style compact --predicate 'eventMessage CONTAINS[c] "vectorcraft" OR process BEGINSWITH "VectorCraft" OR ((process == "qlmanage" OR process CONTAINS[c] "thumbnail" OR process CONTAINS[c] "quicklook" OR process == "pkd" OR process == "extensionkitservice") AND (messageType == error OR messageType == fault))' 2>&1 \
+              | grep -v "runningboard\|CFPasteboard\|CarbonCore" | tail -n 300 || true
+            echo "== crash reports"
+            for f in ~/Library/Logs/DiagnosticReports/*; do
+              case "$f" in *VectorCraft* | *qlmanage* | *Thumbnail* | *QuickLook*) echo "-- $f"; head -n 60 "$f";; esac
+            done
+          } 2>&1 | tee out/diagnostics.txt
 
       # The save rows with Embed Preview on (the default now) and off, on this runner. For the
       # record: shared runners are too noisy for the budgets to fail the job.
