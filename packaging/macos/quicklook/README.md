@@ -66,7 +66,7 @@ cargo xtask bundle                                    # dist/VectorCraft.app, si
 ditto dist/VectorCraft.app /Applications/VectorCraft.app
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f -R -trusted /Applications/VectorCraft.app
 qlmanage -r && qlmanage -r cache
-pluginkit -m -v -p com.apple.quicklook.thumbnail      # lists ai.storyteller.vectorcraft.thumbnail
+pluginkit -m -v -i ai.storyteller.vectorcraft.thumbnail   # registered (-p com.apple.quicklook.thumbnail lists nothing on macOS 15)
 cargo run --release -p vectorcraft-quicklook --example ql_probe -- some.vectorcraft /tmp/some.png
 log show --predicate 'subsystem contains "quicklook"' --last 10m
 ```
