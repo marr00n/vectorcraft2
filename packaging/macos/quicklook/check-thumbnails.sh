@@ -7,9 +7,12 @@
 #
 # Usage: packaging/macos/quicklook/check-thumbnails.sh DOCS_DIR OUT_DIR PROBE
 #
-# Fails when a good document gets no thumbnail either way (or one without the document's colours),
-# or when the probe gets no answer within $QL_TIMEOUT seconds (default 60) on any document; so does
-# qlmanage taking that long, unless it also does on the control. Thumbnails go to
+# Fails when a good document gets no thumbnail (or one without the document's colours), when the
+# probe gets no answer within $QL_TIMEOUT seconds (default 60) on any document, or when qlmanage
+# gets no answer for the control. qlmanage's answers for the documents are recorded, not judged:
+# on macOS 15 it gets none for this document type, even for files the extension answers through
+# QuickLookThumbnailing in a tenth of a second (the first runs of quicklook-macos.yml; Apple's
+# forums report the same, developer.apple.com/forums/thread/784488). Thumbnails go to
 # OUT_DIR/thumbnails (qlmanage) and OUT_DIR/probe, qlmanage's output to OUT_DIR/qlmanage.txt; a
 # summary is printed (and added to the job summary on GitHub Actions). Space-bar previews are tried
 # too (qlmanage -p -o), for the record only.
@@ -18,6 +21,8 @@ DOCS="$1"
 OUT="$2"
 PROBE="$3"
 TIMEOUT="${QL_TIMEOUT:-60}"
+# qlmanage gets no answer for this type (above): don't wait the full time for it.
+QL_WAIT="${QL_WAIT:-20}"
 THUMBS="$OUT/thumbnails"
 PROBED="$OUT/probe"
 mkdir -p "$THUMBS" "$PROBED" "$OUT/previews"
@@ -107,11 +112,10 @@ mkdir -p "$OUT/control"
 echo "== qlmanage -t -s 512 control.png" >>"$LOG"
 within "$TIMEOUT" qlmanage -t -s 512 -o "$OUT/control" "$OUT/control.png"
 control=$?
-if [[ "$control" = 124 ]]; then
-  QLMANAGE_HANGS=1
-  echo "qlmanage -t got no answer for a plain PNG either (the control): its hangs are not held against the extension"
+if [[ "$control" = 124 || ! -s "$OUT/control/control.png.png" ]]; then
+  echo "qlmanage -t made no thumbnail of a plain PNG (the control, exit $control)"
+  failed=1
 else
-  QLMANAGE_HANGS=0
   echo "control: qlmanage -t answered for a plain PNG (exit $control; thumbnail: $(find "$OUT/control" -type f -name '*.png' | tr '\n' ' '))"
 fi
 summary+="| control.png | control | $([[ $control = 124 ]] && echo "no answer in ${TIMEOUT}s" || echo "exit $control") | | |\n"
@@ -120,7 +124,7 @@ check() {
   local kind="$1" name="$2" doc="$DOCS/$2" png="$THUMBS/$2.png" probed="$PROBED/$2.png" start status pstatus ql probe
   start=$SECONDS
   echo "== qlmanage -t -s 512 $name" >>"$LOG"
-  within "$TIMEOUT" qlmanage -t -s 512 -o "$THUMBS" "$doc"
+  within "$QL_WAIT" qlmanage -t -s 512 -o "$THUMBS" "$doc"
   status=$?
   echo "== ql_probe $name" >>"$LOG"
   within "$((TIMEOUT + 5))" "$PROBE" "$doc" "$probed" 512 "$TIMEOUT"
@@ -130,18 +134,16 @@ check() {
     if [[ -s "$1" ]]; then
       echo "thumbnail $(sips -g pixelWidth -g pixelHeight "$1" 2>/dev/null | awk '/pixel/ {printf "%s ", $2}')"
     elif [[ "$2" = 124 ]]; then
-      echo "NO ANSWER in ${TIMEOUT}s"
+      echo "no answer in ${3}s"
     else
       echo "none (exit $2)"
     fi
   }
-  ql="$(describe "$png" "$status")"
-  probe="$(describe "$probed" "$pstatus")"
+  ql="$(describe "$png" "$status" "$QL_WAIT")"
+  probe="$(describe "$probed" "$pstatus" "$TIMEOUT")"
   # The probe's own timeout gives 124 too.
   if [[ "$pstatus" = 124 ]]; then
-    failed=1
-  fi
-  if [[ "$status" = 124 && "$QLMANAGE_HANGS" = 0 ]]; then
+    probe="$probe — HUNG"
     failed=1
   fi
   if [[ "$kind" = good ]]; then
@@ -160,10 +162,11 @@ check() {
   summary+="| $name | $kind | $ql | $probe | $took |\n"
   # The Space-bar preview, for the record.
   echo "== qlmanage -p -o $name" >>"$LOG"
-  within "$TIMEOUT" qlmanage -p -o "$OUT/previews" "$doc"
+  # qlmanage can't host a data-based preview extension (it stops on a fault in
+  # ExtensionFoundation: no extension context host class), so this records only that it ends.
+  within "$QL_WAIT" qlmanage -p -o "$OUT/previews" "$doc"
   if [[ $? = 124 ]]; then
-    echo "$name: the preview got no answer in ${TIMEOUT}s"
-    summary+="| $name | preview | no answer in ${TIMEOUT}s | | |\n"
+    echo "$name: qlmanage -p got no answer in ${QL_WAIT}s"
   fi
 }
 

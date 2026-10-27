@@ -87,6 +87,18 @@ jobs:
       - name: Thumbnails
         run: packaging/macos/quicklook/check-thumbnails.sh "$PWD/docs-in" "$PWD/out" "$PWD/target/aarch64-apple-darwin/release/examples/ql_probe"
 
+      # The probe's thumbnails of the good documents as base64 between markers, so they can be
+      # read from the job log where the artifact can't be downloaded.
+      - name: Thumbnails as text
+        if: always()
+        run: |
+          for f in out/probe/*.png; do
+            [ -f "$f" ] || continue
+            echo "-----BEGIN THUMBNAIL $(basename "$f")-----"
+            base64 -i "$f" | fold -w 120
+            echo "-----END THUMBNAIL $(basename "$f")-----"
+          done
+
       # What the system made of the extensions, for a failed (or puzzling) run: the registrations
       # pluginkit knows of (rejected ones too), errors from the processes that load them, and any
       # crash reports.

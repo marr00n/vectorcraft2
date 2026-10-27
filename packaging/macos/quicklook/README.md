@@ -21,7 +21,7 @@ Both serve the type `ai.storyteller.vectorcraft.document` that `../Info.plist.in
 - `entitlements.plist`: app extensions must be sandboxed; they read only the file Quick Look hands
   them.
 - `make-test-files.sh`, `check-thumbnails.sh`: what `.github/workflows/quicklook-macos.yml` runs on a
-  macOS runner after installing the ad-hoc-signed app.
+  macOS runner after installing the ad-hoc-signed app, with `crates/quicklook/examples/ql_probe.rs`.
 
 ## Thumbnails need the embedded preview
 
@@ -67,6 +67,12 @@ ditto dist/VectorCraft.app /Applications/VectorCraft.app
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f -R -trusted /Applications/VectorCraft.app
 qlmanage -r && qlmanage -r cache
 pluginkit -m -v -p com.apple.quicklook.thumbnail      # lists ai.storyteller.vectorcraft.thumbnail
-qlmanage -t -s 512 -o /tmp some.vectorcraft           # writes /tmp/some.vectorcraft.png
+cargo run --release -p vectorcraft-quicklook --example ql_probe -- some.vectorcraft /tmp/some.png
 log show --predicate 'subsystem contains "quicklook"' --last 10m
 ```
+
+`ql_probe` asks QuickLookThumbnailing for the thumbnail, as Finder does. `qlmanage` doesn't reach
+these extensions on macOS 15: `qlmanage -t` gets no answer for the document type (while it does
+for a PNG, and the extension answers the probe in a tenth of a second), and `qlmanage -p` can't
+host a data-based preview extension (it stops on a fault in ExtensionFoundation, "no extension
+context host class"). Check the Space-bar preview in Finder. The workflow records both.
