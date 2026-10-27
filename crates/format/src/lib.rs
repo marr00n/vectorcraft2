@@ -655,6 +655,34 @@ pub fn preview(bytes: &[u8]) -> Option<Vec<u8>> {
     head_member(bytes, |h| h.preview)
 }
 
+/// The preview PNG embedded in a native file, after the checks [`load`] makes on the file itself:
+/// `Ok(None)` when a file this version reads has no preview; an error when the bytes aren't a
+/// native file, were written by a newer version ([`FormatError::TooNew`]), unpack past
+/// [`MAX_JSON`], [`MAX_BLOB`] or [`MAX_BLOBS`] ([`FormatError::TooBig`]), or the preview's bytes
+/// are missing. The document itself is not read (Finder's thumbnails, #663).
+pub fn preview_checked(bytes: &[u8]) -> Result<Option<Vec<u8>>, FormatError> {
+    #[derive(Deserialize)]
+    struct Checked {
+        format: String,
+        version: u32,
+        preview: Option<Image>,
+    }
+    let file = unpack::Unpacked::new(bytes)?;
+    let head: Checked = serde_json::from_slice(file.json()).map_err(|e| FormatError::NotVectorcraft(e.to_string()))?;
+    if head.format != EXTENSION && head.format != LEGACY_EXTENSION {
+        return Err(FormatError::NotVectorcraft(format!("format is `{}`", head.format)));
+    }
+    if head.version > VERSION {
+        return Err(FormatError::TooNew(head.version));
+    }
+    let Some(img) = head.preview else { return Ok(None) };
+    let png = match img.blob {
+        Some(at) => file.entries(&[at])?.pop().flatten().map(Arc::unwrap_or_clone),
+        None => img.inline(),
+    };
+    png.map(Some).ok_or_else(|| FormatError::BadImage("preview".into()))
+}
+
 /// The PDF a native file saved with Create PDF-Compatible File carries (`None`: it has none, or
 /// isn't a native file).
 pub fn pdf_content(bytes: &[u8]) -> Option<Vec<u8>> {
@@ -739,6 +767,40 @@ mod tests {
         assert_eq!(load(legacy.as_bytes()).unwrap().artboards[0].rect, d.artboards[0].rect);
         assert!(is_native_name("old/Poster.DrawCraft") && is_native_name("new.vectorcraft") && !is_native_name("x.svg"));
         assert!(load(br#"{"format":"other","version":1,"document":{}}"#).is_err());
+    }
+
+    #[test]
+    fn preview_checked_reads_only_files_this_version_reads() {
+        let d = Document::new(10.0, 10.0);
+        let small = vec![7u8; 100];
+        // Past INLINE_MAX: kept after the JSON in a v4 file.
+        let big: Vec<u8> = (0..INLINE_MAX + 100).map(|i| (i % 251) as u8).collect();
+        for compress in [false, true] {
+            for png in [&small, &big] {
+                let o = SaveOptions { compress, preview: Some(png.clone()), ..SaveOptions::default() };
+                let bytes = save_with(&d, &o).unwrap();
+                assert_eq!(preview_checked(&bytes).unwrap().as_ref(), Some(png), "compress {compress}, {} bytes", png.len());
+                assert_eq!(preview(&bytes).as_ref(), Some(png));
+            }
+        }
+        let plain = save(&d, false);
+        assert!(preview_checked(&plain).unwrap().is_none(), "no preview is no error");
+        let text = String::from_utf8(save_with(&d, &SaveOptions { preview: Some(small.clone()), ..SaveOptions::default() }).unwrap()).unwrap();
+        let legacy = text.replacen("\"format\":\"vectorcraft\"", "\"format\":\"drawcraft\"", 1);
+        assert_eq!(preview_checked(legacy.as_bytes()).unwrap(), Some(small.clone()), "the former name");
+        let newer = text.replacen(&format!("\"version\":{VERSION}"), "\"version\":99", 1);
+        assert!(matches!(preview_checked(newer.as_bytes()), Err(FormatError::TooNew(99))));
+        assert!(preview(newer.as_bytes()).is_some(), "the unchecked read doesn't look");
+        let other = text.replacen("\"format\":\"vectorcraft\"", "\"format\":\"other\"", 1);
+        assert!(matches!(preview_checked(other.as_bytes()), Err(FormatError::NotVectorcraft(_))));
+        for junk in [&b""[..], b"{", b"\x1f\x8b\x08garbage", b"{\"format\":\"vectorcraft\"}", b"[1,2]"] {
+            assert!(preview_checked(junk).is_err(), "{junk:?}");
+        }
+        // A blob reference past the end of the file.
+        let o = SaveOptions { preview: Some(big.clone()), ..SaveOptions::default() };
+        let whole = save_with(&d, &o).unwrap();
+        let cut = &whole[..whole.len() - 50];
+        assert!(preview_checked(cut).is_err());
     }
 
     #[test]
