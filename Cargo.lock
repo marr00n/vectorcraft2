@@ -6248,6 +6248,7 @@ dependencies = [
  "vectorcraft-pathops",
  "vectorcraft-pdf",
  "vectorcraft-plugins",
+ "vectorcraft-quicklook",
  "vectorcraft-render",
  "vectorcraft-scriptcheck",
  "vectorcraft-svg",
