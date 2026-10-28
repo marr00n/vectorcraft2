@@ -3,6 +3,7 @@
 //! `QLPreviewReply`, or with an error (Quick Look then shows the file's icon and details).
 
 use std::ptr::NonNull;
+use std::sync::OnceLock;
 
 use block2::{DynBlock, RcBlock};
 use objc2::rc::Retained;
@@ -44,7 +45,10 @@ fn reply(request: &QLFilePreviewRequest) -> Result<Retained<QLPreviewReply>> {
     // SAFETY: a plain property read.
     let url = unsafe { request.fileURL() };
     let path = file_path(&url)?;
-    let preview = guarded(|| crate::preview(read_file(&path, MAX_FILE)?, &Limits::default()))?;
+    // One set for the process, so renders that ran out of time are counted across requests.
+    static LIMITS: OnceLock<Limits> = OnceLock::new();
+    let limits = LIMITS.get_or_init(Limits::default);
+    let preview = guarded(|| crate::preview(read_file(&path, MAX_FILE)?, limits))?;
     let data = NSData::with_bytes(&preview.png);
     let make = RcBlock::new(move |_reply: NonNull<QLPreviewReply>, _error: *mut *mut NSError| -> *mut NSData {
         // Returned autoreleased, as a block's object result is.

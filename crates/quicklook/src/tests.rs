@@ -131,6 +131,8 @@ fn previews_fall_back_to_the_embedded_one() {
     let no_time = Limits { time: Duration::ZERO, ..Limits::default() };
     let p = preview(saved(Some(embedded.clone()), true), &no_time).unwrap();
     assert!(!p.rendered && p.png == embedded && p.points == (64.0, 32.0), "out of time");
+    // Fresh limits: the render above may still be running, and would make this one wait its turn.
+    let no_time = Limits { time: Duration::ZERO, ..Limits::default() };
     assert!(matches!(preview(saved(None, true), &no_time), Err(QuickLookError::TimedOut(_))));
     let tiny_file = Limits { max_render_file: 10, ..Limits::default() };
     let p = preview(saved(Some(embedded.clone()), false), &tiny_file).unwrap();
@@ -142,6 +144,40 @@ fn previews_fall_back_to_the_embedded_one() {
     assert!(matches!(preview(bytes, &Limits::default()), Err(QuickLookError::Empty)));
     let bytes = save_with(&empty, &SaveOptions { preview: Some(embedded.clone()), ..SaveOptions::default() }).unwrap();
     assert!(!preview(bytes, &Limits::default()).unwrap().rendered);
+}
+
+#[test]
+fn previews_of_documents_past_the_render_caps_show_the_embedded_one() {
+    let embedded = png(64, 32);
+    let bytes = saved(Some(embedded.clone()), true);
+    let tight = Limits { caps: vectorcraft_format::ReadCaps { json: 100, blobs: 0 }, ..Limits::default() };
+    let p = preview(bytes.clone(), &tight).unwrap();
+    assert!(!p.rendered && p.png == embedded, "past the caps: not rendered");
+    assert!(matches!(render(&bytes, &tight), Err(QuickLookError::Format(FormatError::TooBig))));
+    assert!(matches!(preview(saved(None, true), &tight), Err(QuickLookError::Format(FormatError::TooBig))), "nothing else to show");
+    assert!(preview(bytes, &Limits::default()).unwrap().rendered);
+}
+
+#[test]
+fn renders_that_ran_out_of_time_are_counted_until_they_end() {
+    let limits = Limits { time: Duration::ZERO, ..Limits::default() };
+    // While one is still running, no other render starts.
+    limits.late.store(1, std::sync::atomic::Ordering::SeqCst);
+    assert!(matches!(render_in_time(saved(None, false), &limits), Err(QuickLookError::Busy)));
+    let embedded = png(64, 32);
+    let p = preview(saved(Some(embedded.clone()), false), &limits).unwrap();
+    assert!(!p.rendered && p.png == embedded, "busy: the embedded preview");
+    assert_eq!(QuickLookError::Busy.code(), 11);
+    // A render given up on counts until its thread ends, then no longer.
+    limits.late.store(0, std::sync::atomic::Ordering::SeqCst);
+    assert!(matches!(render_in_time(saved(None, false), &limits), Err(QuickLookError::TimedOut(_))));
+    let start = std::time::Instant::now();
+    while limits.late.load(std::sync::atomic::Ordering::SeqCst) != 0 {
+        assert!(start.elapsed() < Duration::from_secs(30), "the late render never stopped counting");
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    let roomy = Limits { late: limits.late.clone(), ..Limits::default() };
+    assert!(preview(saved(None, false), &roomy).unwrap().rendered, "renders start again");
 }
 
 #[test]

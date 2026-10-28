@@ -1900,7 +1900,7 @@ proptest! {
     /// Damaged native files carrying a preview, as Finder's Quick Look extensions read them: flipped
     /// bytes and cuts anywhere, the embedded PNG's included (inline, and after the JSON in v4).
     #[test]
-    fn quick_look_reads_mutated_files_without_panicking(which in 0usize..3, cut in 0usize..40_000, edits in prop::collection::vec((0usize..40_000, any::<u8>()), 0..10), tail in any::<bool>()) {
+    fn quick_look_reads_mutated_files_without_panicking(which in 0usize..5, cut in 0usize..40_000, edits in prop::collection::vec((0usize..40_000, any::<u8>()), 0..10), tail in any::<bool>()) {
         let mut bytes = previewed_samples()[which].clone();
         let n = bytes.len();
         for &(at, b) in &edits {
@@ -1916,11 +1916,12 @@ proptest! {
     }
 }
 
-/// The rich document saved with an embedded preview: plain (a small preview, inline), and v4 with
-/// a large one kept after the JSON, uncompressed and compressed.
-fn previewed_samples() -> &'static [Vec<u8>; 3] {
-    use vectorcraft_format::{SaveOptions, save_with};
-    static SAMPLES: std::sync::OnceLock<[Vec<u8>; 3]> = std::sync::OnceLock::new();
+/// The rich document saved with an embedded preview: a small one and a large one, in the JSON as
+/// VectorCraft writes it (uncompressed and compressed), and the large one kept after the JSON as
+/// another writer may keep it (v4, uncompressed and compressed).
+fn previewed_samples() -> &'static [Vec<u8>; 5] {
+    use vectorcraft_format::{BLOB_MAGIC, SaveOptions, save_with};
+    static SAMPLES: std::sync::OnceLock<[Vec<u8>; 5]> = std::sync::OnceLock::new();
     SAMPLES.get_or_init(|| {
         let png = |w: u32, h: u32| {
             // Noise, so the PNG stays large (past INLINE_MAX) when it is the big one.
@@ -1937,7 +1938,25 @@ fn previewed_samples() -> &'static [Vec<u8>; 3] {
         let d = rich_doc();
         let save =
             |preview: &Vec<u8>, compress| save_with(&d, &SaveOptions { preview: Some(preview.clone()), compress, ..SaveOptions::default() }).unwrap();
-        [save(&small, false), save(&big, false), save(&big, true)]
+        // Saved without a preview, then given one after the data that follows the JSON.
+        let mut after = save_with(&d, &SaveOptions::default()).unwrap();
+        let tail = match after.windows(BLOB_MAGIC.len()).position(|w| w == BLOB_MAGIC) {
+            Some(at) => after.len() - at - BLOB_MAGIC.len(),
+            None => {
+                after.extend_from_slice(BLOB_MAGIC);
+                0
+            }
+        };
+        let field = format!("{{\"preview\":{{\"mime\":\"image/png\",\"blob\":[{tail},{}]}},", big.len());
+        assert_eq!(after.first(), Some(&b'{'));
+        after.splice(0..1, field.bytes());
+        after.extend_from_slice(&big);
+        assert_eq!(vectorcraft_format::preview_checked(&after).unwrap(), Some(big.clone()));
+        let mut gz = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+        std::io::Write::write_all(&mut gz, &after).unwrap();
+        let after_gz = gz.finish().unwrap();
+        assert_eq!(vectorcraft_format::preview_checked(&after_gz).unwrap(), Some(big.clone()));
+        [save(&small, false), save(&big, false), save(&big, true), after, after_gz]
     })
 }
 

@@ -7,9 +7,9 @@
 #
 # Usage: packaging/macos/quicklook/check-thumbnails.sh DOCS_DIR OUT_DIR PROBE
 #
-# Fails when a good document gets no thumbnail (or one without the document's colours), when the
-# probe gets no answer within $QL_TIMEOUT seconds (default 60) on any document, or when qlmanage
-# gets no answer for the control. qlmanage's answers for the documents are recorded, not judged:
+# Fails when the probe gets no thumbnail of a good document (or one without the document's
+# colours), when it gets one of a bad document, when it gets no answer within $QL_TIMEOUT seconds
+# (default 60) on any document, or when qlmanage gets no answer for the control. qlmanage's answers for the documents are recorded, not judged:
 # on macOS 15 it gets none for this document type, even for files the extension answers through
 # QuickLookThumbnailing in a tenth of a second (the first runs of quicklook-macos.yml; Apple's
 # forums report the same, developer.apple.com/forums/thread/784488). Thumbnails go to
@@ -146,17 +146,18 @@ check() {
     probe="$probe — HUNG"
     failed=1
   fi
+  # Judged by the probe alone (Finder's path): qlmanage's answers are recorded, not judged.
   if [[ "$kind" = good ]]; then
-    local shown=""
-    [[ -s "$probed" ]] && shown="$probed"
-    [[ -z "$shown" && -s "$png" ]] && shown="$png"
-    if [[ -z "$shown" ]]; then
+    if [[ "$pstatus" != 0 || ! -s "$probed" ]]; then
       probe="$probe — NO THUMBNAIL"
       failed=1
-    elif [[ "$name" = with-preview.vectorcraft ]] && ! has_colours "$shown" "#d0402c" "#2c74d0" >>"$LOG" 2>&1; then
+    elif [[ "$name" = with-preview.vectorcraft ]] && ! has_colours "$probed" "#d0402c" "#2c74d0" >>"$LOG" 2>&1; then
       probe="$probe — WITHOUT the document's colours"
       failed=1
     fi
+  elif [[ "$pstatus" = 0 || -s "$probed" ]]; then
+    probe="$probe — A THUMBNAIL OF A FILE WITHOUT ONE"
+    failed=1
   fi
   echo "$name ($kind): qlmanage $ql; probe $probe; ${took}s"
   summary+="| $name | $kind | $ql | $probe | $took |\n"

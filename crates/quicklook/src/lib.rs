@@ -11,18 +11,19 @@
 //!   slow, nothing drawn) the embedded preview stands in ([`preview`]).
 //!
 //! Everything a file can say is untrusted. A file this version doesn't read (not a native file, a
-//! newer version, past the format's `MAX_JSON` / `MAX_BLOB` / `MAX_BLOBS` caps, larger than
-//! [`MAX_FILE`] on disk) or without anything to show is an error, which the extension hands back to
+//! newer version, unpacking past [`THUMBNAIL_CAPS`], tighter than the format's own `MAX_*` caps,
+//! larger than [`MAX_FILE`] on disk) or without anything to show is an error, which the extension hands back to
 //! Quick Look so Finder shows the document icon. This library is the extensions' whole read path:
 //! it builds everywhere (its tests and the engine's import fuzzing run on Linux), while the
 //! Objective-C side (`mac`, objc2) builds on macOS only.
 
 use std::io::Read as _;
 use std::path::Path;
-use std::sync::mpsc;
+use std::sync::atomic::{AtomicU8, AtomicUsize, Ordering};
+use std::sync::{Arc, mpsc};
 use std::time::Duration;
 
-use vectorcraft_format::FormatError;
+use vectorcraft_format::{FormatError, ReadCaps};
 use vectorcraft_render::{Renderer, raster_size};
 
 #[cfg(target_os = "macos")]
@@ -39,6 +40,12 @@ pub const MAX_EMBEDDED_SIDE: u32 = 4096;
 const MAX_DECODE_ALLOC: u64 = 64 << 20;
 /// Most pixels per point a preview is rendered at (a small artboard isn't blown up further).
 const MAX_PREVIEW_SCALE: f64 = 8.0;
+/// What reading a compressed file for its embedded preview may unpack: the JSON, where VectorCraft
+/// keeps the preview, and the data after it when another writer keeps the preview there. Finder
+/// asks for thumbnails of every file it shows, unasked, so these are a quarter of what opening
+/// the document may unpack (`vectorcraft_format::MAX_JSON`, 1 GiB); a file past them keeps its
+/// icon.
+pub const THUMBNAIL_CAPS: ReadCaps = ReadCaps { json: 256 << 20, blobs: 256 << 20 };
 
 /// Why the extensions have nothing to show for a file (Quick Look then shows its icon).
 #[derive(Debug, thiserror::Error)]
@@ -59,6 +66,8 @@ pub enum QuickLookError {
     TimedOut(Duration),
     #[error("rendering failed: {0}")]
     Render(String),
+    #[error("previews that ran out of time are still rendering")]
+    Busy,
 }
 
 pub type Result<T> = std::result::Result<T, QuickLookError>;
@@ -77,6 +86,7 @@ impl QuickLookError {
             Self::Empty => 8,
             Self::TimedOut(_) => 9,
             Self::Render(_) => 10,
+            Self::Busy => 11,
         }
     }
 }
@@ -124,7 +134,7 @@ pub fn fit(width: u32, height: u32, max_w: f64, max_h: f64) -> Option<(u32, u32)
 /// Finder's thumbnail of a native file: its embedded preview scaled to fit `max_w` × `max_h`
 /// pixels. The document isn't read.
 pub fn thumbnail(bytes: &[u8], max_w: f64, max_h: f64) -> Result<Picture> {
-    let png = vectorcraft_format::preview_checked(bytes)?.ok_or(QuickLookError::NoPreview)?;
+    let png = vectorcraft_format::preview_checked_within(bytes, THUMBNAIL_CAPS)?.ok_or(QuickLookError::NoPreview)?;
     let img = decode_png(&png)?;
     let (w, h) = fit(img.width(), img.height(), max_w, max_h).ok_or(QuickLookError::Empty)?;
     let img = if (w, h) == img.dimensions() { img } else { image::imageops::resize(&img, w, h, image::imageops::FilterType::CatmullRom) };
@@ -148,7 +158,7 @@ fn decode_png(png: &[u8]) -> Result<image::RgbaImage> {
 }
 
 /// How much a Space-bar preview may cost.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Limits {
     /// Most pixels on the longer side.
     pub max_side: u32,
@@ -159,11 +169,29 @@ pub struct Limits {
     /// Largest file (bytes on disk) whose document is read and rendered; a larger one shows its
     /// embedded preview.
     pub max_render_file: u64,
+    /// What reading the document to render it may unpack of a compressed file; past it, the
+    /// embedded preview shows.
+    pub caps: ReadCaps,
+    /// Most renders that ran out of time may still be running before no more are started (the
+    /// embedded preview shows instead): a render can't be stopped, so paging through large
+    /// documents with the Space bar would otherwise pile them up.
+    pub max_late: usize,
+    /// Renders that ran out of time and are still running, shared by the clones of these limits
+    /// (the extension keeps one set for its whole process).
+    pub late: Arc<AtomicUsize>,
 }
 
 impl Default for Limits {
     fn default() -> Self {
-        Self { max_side: 2048, max_pixels: 2048 * 2048, time: Duration::from_secs(5), max_render_file: 128 << 20 }
+        Self {
+            max_side: 2048,
+            max_pixels: 2048 * 2048,
+            time: Duration::from_secs(5),
+            max_render_file: 128 << 20,
+            caps: ReadCaps { json: 64 << 20, blobs: 256 << 20 },
+            max_late: 1,
+            late: Arc::default(),
+        }
     }
 }
 
@@ -183,9 +211,19 @@ pub struct Preview {
 /// `limits`, or the embedded preview when rendering is refused, fails or runs out of time. A file
 /// this version can't read is an error at once (nothing is rendered).
 pub fn preview(bytes: Vec<u8>, limits: &Limits) -> Result<Preview> {
-    let embedded = vectorcraft_format::preview_checked(&bytes)?;
-    let rendered =
-        if bytes.len() as u64 <= limits.max_render_file { render_in_time(bytes, limits) } else { Err(QuickLookError::TooLarge(bytes.len() as u64)) };
+    // A document whose JSON unpacks past the render caps isn't rendered, but its preview shows.
+    let (embedded, small) = match vectorcraft_format::preview_checked_within(&bytes, limits.caps) {
+        Ok(embedded) => (embedded, true),
+        Err(FormatError::TooBig) => (vectorcraft_format::preview_checked_within(&bytes, THUMBNAIL_CAPS)?, false),
+        Err(e) => return Err(e.into()),
+    };
+    let rendered = if !small {
+        Err(QuickLookError::Format(FormatError::TooBig))
+    } else if bytes.len() as u64 > limits.max_render_file {
+        Err(QuickLookError::TooLarge(bytes.len() as u64))
+    } else {
+        render_in_time(bytes, limits)
+    };
     match (rendered, embedded) {
         (Ok(p), _) => Ok(p),
         (Err(_), Some(png)) => embedded_preview(png),
@@ -193,22 +231,56 @@ pub fn preview(bytes: Vec<u8>, limits: &Limits) -> Result<Preview> {
     }
 }
 
+/// A render's state, shared by its thread and the request waiting for it.
+const RUNNING: u8 = 0;
+const DONE: u8 = 1;
+/// The request stopped waiting: the render counts in [`Limits::late`] until it ends.
+const LATE: u8 = 2;
+
+/// Ends a render on its thread (also when it panics): a late one stops counting.
+struct Ending {
+    state: Arc<AtomicU8>,
+    late: Arc<AtomicUsize>,
+}
+
+impl Drop for Ending {
+    fn drop(&mut self) {
+        if self.state.swap(DONE, Ordering::SeqCst) == LATE {
+            self.late.fetch_sub(1, Ordering::SeqCst);
+        }
+    }
+}
+
 /// [`render`] on a thread of its own, given up on after `limits.time`. The renderer can't be
-/// stopped part-way: a render that runs late finishes unseen (Quick Look ends the extension's
-/// process when it is done with it).
+/// stopped part-way: a render that runs late finishes unseen, and while [`Limits::max_late`] of
+/// them are still running no other is started ([`QuickLookError::Busy`]).
 fn render_in_time(bytes: Vec<u8>, limits: &Limits) -> Result<Preview> {
+    if limits.late.load(Ordering::SeqCst) >= limits.max_late {
+        return Err(QuickLookError::Busy);
+    }
     let (tx, rx) = mpsc::sync_channel(1);
     let l = limits.clone();
+    let state = Arc::new(AtomicU8::new(RUNNING));
+    let ending = Ending { state: state.clone(), late: limits.late.clone() };
     std::thread::Builder::new()
         .name("quicklook-render".into())
         .spawn(move || {
+            let _ending = ending;
             // Nobody listens any more once the time is up.
             let _ = tx.send(render(&bytes, &l));
         })
         .map_err(|e| QuickLookError::Render(e.to_string()))?;
     match rx.recv_timeout(limits.time) {
         Ok(r) => r,
-        Err(mpsc::RecvTimeoutError::Timeout) => Err(QuickLookError::TimedOut(limits.time)),
+        Err(mpsc::RecvTimeoutError::Timeout) => {
+            // Counted before it is marked late, so the thread never takes back what wasn't added.
+            limits.late.fetch_add(1, Ordering::SeqCst);
+            if state.compare_exchange(RUNNING, LATE, Ordering::SeqCst, Ordering::SeqCst).is_err() {
+                // It ended meanwhile.
+                limits.late.fetch_sub(1, Ordering::SeqCst);
+            }
+            Err(QuickLookError::TimedOut(limits.time))
+        }
         // The thread ended without an answer (a bug the renderer panicked on).
         Err(mpsc::RecvTimeoutError::Disconnected) => Err(QuickLookError::Render("the renderer stopped".into())),
     }
@@ -228,7 +300,7 @@ pub fn preview_scale(w: f64, h: f64, limits: &Limits) -> Option<f64> {
 
 /// The first artboard (else the art) of the document in `bytes` as a PNG within `limits`.
 pub fn render(bytes: &[u8], limits: &Limits) -> Result<Preview> {
-    let doc = vectorcraft_format::load(bytes)?;
+    let doc = vectorcraft_format::load_within(bytes, limits.caps)?;
     let (rect, white) = match doc.artboards.first() {
         Some(a) => (a.rect, true),
         None => (vectorcraft_render::encode::art_bounds(&doc).ok_or(QuickLookError::Empty)?, false),

@@ -40,16 +40,24 @@ A file the extensions can't show is an error for Quick Look (an `NSError` in the
 | 1 | the file can't be read |
 | 2 | the file is larger than 512 MB |
 | 3 | a newer version than this VectorCraft reads |
-| 4 | gzip that unpacks past the format's `MAX_JSON` / `MAX_BLOB` / `MAX_BLOBS` |
+| 4 | gzip that unpacks past what the extensions read (below) |
 | 5 | not a VectorCraft document (damaged, cut short, another format) |
 | 6 | no embedded preview (thumbnails only) |
 | 7 | the embedded preview isn't a PNG the extension reads (at most 4096 px a side) |
 | 8 | nothing to show |
 | 9 | rendering ran out of time (and there is no embedded preview) |
 | 10 | rendering failed (an internal error included: a panic is caught, never unwinds into Quick Look) |
+| 11 | a preview that ran out of time is still rendering (and there is no embedded preview) |
 
-A preview render that runs out of time finishes on its own thread, unseen; Quick Look ends the
-extension's process when it is done with it.
+A compressed file is unpacked within caps tighter than VectorCraft's own when it opens a document
+(`vectorcraft_format::MAX_JSON`, 1 GiB, and `MAX_BLOBS`, 4 GiB), since Finder asks for thumbnails
+of every file it shows: 256 MB of JSON and 256 MB of data after it for the embedded preview
+(`THUMBNAIL_CAPS`), and 64 MB of JSON and 256 MB of images to render the Space-bar preview
+(`Limits::caps`; past them, the embedded preview shows).
+
+A preview render that runs out of time can't be stopped: it finishes on its own thread, unseen.
+While one is still running, the next preview shows the embedded PNG instead of starting another
+render (`Limits::max_late`), so paging through large documents doesn't pile renders up.
 
 ## Signing
 
