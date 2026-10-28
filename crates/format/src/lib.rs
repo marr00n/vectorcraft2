@@ -84,8 +84,8 @@ const MAX_UNPACKED: u64 = 512 << 20;
 /// How much reading a native file may unpack: a reader that needs less than [`load`] (Finder's
 /// Quick Look extensions) gives smaller caps, so a file past them is refused
 /// ([`FormatError::TooBig`]) before that much is unpacked or read. A cap larger than its default
-/// ([`MAX_JSON`], [`MAX_BLOBS`]) counts as the default. The default JSON cap applies to compressed
-/// files only (an uncompressed file is in memory already); a tighter one applies to both.
+/// ([`MAX_JSON`], [`MAX_BLOBS`]) counts as the default. The default caps apply to compressed files
+/// only (an uncompressed file is in memory already); tighter ones apply to both.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ReadCaps {
     /// Most bytes the JSON may unpack to.
@@ -901,6 +901,11 @@ mod tests {
         let tight = ReadCaps { json: plain_json - 1, ..ReadCaps::default() };
         assert!(matches!(preview_checked_within(&plain, tight), Err(FormatError::TooBig)));
         assert!(matches!(load_within(&plain, tight), Err(FormatError::TooBig)));
+        // So does a tighter cap on the data after the JSON.
+        let room = ReadCaps { blobs: png.len() as u64, ..ReadCaps::default() };
+        assert_eq!(preview_checked_within(&plain, room).unwrap(), Some(png.clone()));
+        let short = ReadCaps { blobs: png.len() as u64 - 1, ..ReadCaps::default() };
+        assert!(matches!(preview_checked_within(&plain, short), Err(FormatError::TooBig)));
         // Caps past the defaults are the defaults.
         let huge = ReadCaps { json: u64::MAX, blobs: u64::MAX };
         assert_eq!(huge.within_defaults(), ReadCaps::default());

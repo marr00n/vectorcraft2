@@ -185,6 +185,11 @@ impl<'a> Unpacked<'a> {
         };
         match self.tail {
             Tail::Slice(tail) => {
+                // In memory already: the default cap doesn't limit the entries (they are copied
+                // from the data, no more than it has), but a tighter one does, as for the JSON.
+                if self.caps.blobs < ReadCaps::default().blobs {
+                    within(wanted, MAX_BLOB.min(self.caps.blobs), self.caps.blobs)?;
+                }
                 within(wanted, u64::MAX, self.caps.blobs.max(tail.len() as u64))?;
                 in_memory(tail, &mut out)?;
             }
