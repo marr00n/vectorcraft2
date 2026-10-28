@@ -51,7 +51,8 @@ within() {
 }
 
 # Does the PNG $1 have pixels near each "#rrggbb" colour after it? (No colour: "is it a PNG?")
-# Python's standard library only; an unusual PNG layout prints a note and passes.
+# Python's standard library only: 8- or 16-bit grey, grey and alpha, RGB or RGBA, not interlaced.
+# Any other layout fails, so the check can't pass without looking at the pixels.
 has_colours() {
   python3 - "$@" <<'PY'
 import struct, sys, zlib
@@ -60,7 +61,7 @@ data = open(path, "rb").read()
 if data[:8] != b"\x89PNG\r\n\x1a\n":
     sys.exit("not a PNG")
 pos, idat, ihdr = 8, b"", None
-while pos < len(data):
+while pos + 8 <= len(data):
     n, kind = struct.unpack(">I4s", data[pos:pos + 8])
     body = data[pos + 8:pos + 8 + n]
     if kind == b"IHDR":
@@ -68,17 +69,20 @@ while pos < len(data):
     elif kind == b"IDAT":
         idat += body
     pos += 12 + n
+if ihdr is None:
+    sys.exit(f"{path}: no IHDR")
 w, h, depth, ctype, _, _, interlace = ihdr
-channels = {2: 3, 6: 4}.get(ctype)
-if depth != 8 or channels is None or interlace:
-    print(f"note: {path}: depth {depth}, colour type {ctype}, interlace {interlace}: colours not checked")
-    sys.exit(0)
-raw, stride, prev, rows = zlib.decompress(idat), w * channels, bytearray(w * channels), []
+channels = {0: 1, 2: 3, 4: 2, 6: 4}.get(ctype)
+if depth not in (8, 16) or channels is None or interlace:
+    sys.exit(f"{path}: depth {depth}, colour type {ctype}, interlace {interlace}: a layout this check doesn't read")
+bpp = channels * depth // 8
+raw, stride, rows = zlib.decompress(idat), w * bpp, []
+prev = bytearray(stride)
 for y in range(h):
     f, line = raw[y * (stride + 1)], bytearray(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)])
     for i in range(stride):
-        a = line[i - channels] if i >= channels else 0
-        b, c = prev[i], prev[i - channels] if i >= channels else 0
+        a = line[i - bpp] if i >= bpp else 0
+        b, c = prev[i], prev[i - bpp] if i >= bpp else 0
         if f == 1: line[i] = (line[i] + a) & 255
         elif f == 2: line[i] = (line[i] + b) & 255
         elif f == 3: line[i] = (line[i] + (a + b) // 2) & 255
@@ -88,7 +92,11 @@ for y in range(h):
             line[i] = (line[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
     rows.append(line)
     prev = line
-seen = {px for row in rows for px in (tuple(row[i:i + 3]) for i in range(0, stride, channels))}
+step = depth // 8  # 16-bit samples: their high byte
+def rgb(row, x):
+    s = [row[(x * channels + k) * step] for k in range(channels)]
+    return tuple(s[:3]) if channels >= 3 else (s[0],) * 3
+seen = {rgb(row, x) for row in rows for x in range(w)}
 missing = [c for c in colours if not any(sum(abs(p - q) for p, q in zip(c, s)) <= 24 for s in seen)]
 if missing:
     sys.exit(f"{path}: no pixels near {['#%02x%02x%02x' % c for c in missing]} ({w}×{h}, {len(seen)} colours)")
