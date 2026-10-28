@@ -156,6 +156,12 @@ fn previews_of_documents_past_the_render_caps_show_the_embedded_one() {
     assert!(matches!(render(&bytes, &tight), Err(QuickLookError::Format(FormatError::TooBig))));
     assert!(matches!(preview(saved(None, true), &tight), Err(QuickLookError::Format(FormatError::TooBig))), "nothing else to show");
     assert!(preview(bytes, &Limits::default()).unwrap().rendered);
+    // Uncompressed files too.
+    let plain = saved(Some(embedded.clone()), false);
+    let p = preview(plain.clone(), &tight).unwrap();
+    assert!(!p.rendered && p.png == embedded, "uncompressed, past the caps: not rendered");
+    assert!(matches!(render(&plain, &tight), Err(QuickLookError::Format(FormatError::TooBig))));
+    assert!(preview(plain, &Limits::default()).unwrap().rendered);
 }
 
 #[test]

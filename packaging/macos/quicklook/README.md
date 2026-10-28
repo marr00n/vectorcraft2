@@ -49,7 +49,7 @@ A file the extensions can't show is an error for Quick Look (an `NSError` in the
 | 10 | rendering failed (an internal error included: a panic is caught, never unwinds into Quick Look) |
 | 11 | a preview that ran out of time is still rendering (and there is no embedded preview) |
 
-A compressed file is unpacked within caps tighter than VectorCraft's own when it opens a document
+A file is read within caps tighter than VectorCraft's own when it opens a document
 (`vectorcraft_format::MAX_JSON`, 1 GiB, and `MAX_BLOBS`, 4 GiB), since Finder asks for thumbnails
 of every file it shows: 256 MB of JSON and 256 MB of data after it for the embedded preview
 (`THUMBNAIL_CAPS`), and 64 MB of JSON and 256 MB of images to render the Space-bar preview

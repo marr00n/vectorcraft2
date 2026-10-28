@@ -76,12 +76,17 @@ impl<'a> Unpacked<'a> {
 
     /// Open `bytes` (compressed or not) within `caps` (each at most its default): the JSON part
     /// unpacks to at most `caps.json` bytes, and the entries after it are read within
-    /// `caps.blobs` ([`Self::entries`]).
+    /// `caps.blobs` ([`Self::entries`]). An uncompressed file's JSON is already in memory, so the
+    /// default cap doesn't apply to it, but a tighter one does: the document read from it is
+    /// several times its size.
     pub(crate) fn open(bytes: &'a [u8], caps: ReadCaps) -> Result<Self, FormatError> {
         let caps = caps.within_defaults();
         let max_json = caps.json;
         if !is_compressed(bytes) {
             let (json, tail) = split_tail(bytes);
+            if max_json < ReadCaps::default().json && json.len() as u64 > max_json {
+                return Err(FormatError::TooBig);
+            }
             return Ok(Self { json: Json::Borrowed(json), tail: Tail::Slice(tail), caps });
         }
         let mut dec = GzDecoder::new(bytes);

@@ -81,10 +81,11 @@ pub const MAX_BLOBS: u64 = if cfg!(target_arch = "wasm32") { 1 << 30 } else { 4 
 /// (hand-made or damaged files) may unpack to: it is unpacked whole.
 const MAX_UNPACKED: u64 = 512 << 20;
 
-/// How much reading a compressed native file may unpack: a reader that needs less than [`load`]
-/// (Finder's Quick Look extensions) gives smaller caps, so a file past them is refused
-/// ([`FormatError::TooBig`]) before that much is unpacked. A cap larger than its default
-/// ([`MAX_JSON`], [`MAX_BLOBS`]) counts as the default.
+/// How much reading a native file may unpack: a reader that needs less than [`load`] (Finder's
+/// Quick Look extensions) gives smaller caps, so a file past them is refused
+/// ([`FormatError::TooBig`]) before that much is unpacked or read. A cap larger than its default
+/// ([`MAX_JSON`], [`MAX_BLOBS`]) counts as the default. The default JSON cap applies to compressed
+/// files only (an uncompressed file is in memory already); a tighter one applies to both.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ReadCaps {
     /// Most bytes the JSON may unpack to.
@@ -892,6 +893,14 @@ mod tests {
         let short_blobs = ReadCaps { blobs: png.len() as u64, ..roomy };
         assert!(matches!(preview_checked_within(&file, short_blobs), Err(FormatError::TooBig)));
         assert!(matches!(load_within(&file, short_json), Err(FormatError::TooBig)));
+        // A tighter JSON cap applies to an uncompressed file too; the default one doesn't.
+        let plain = with_preview_after_the_json(&d, 1000, &png, false);
+        let plain_json = plain.windows(BLOB_MAGIC.len()).position(|w| w == BLOB_MAGIC).unwrap() as u64;
+        let fits = ReadCaps { json: plain_json, ..ReadCaps::default() };
+        assert_eq!(preview_checked_within(&plain, fits).unwrap(), Some(png.clone()));
+        let tight = ReadCaps { json: plain_json - 1, ..ReadCaps::default() };
+        assert!(matches!(preview_checked_within(&plain, tight), Err(FormatError::TooBig)));
+        assert!(matches!(load_within(&plain, tight), Err(FormatError::TooBig)));
         // Caps past the defaults are the defaults.
         let huge = ReadCaps { json: u64::MAX, blobs: u64::MAX };
         assert_eq!(huge.within_defaults(), ReadCaps::default());
