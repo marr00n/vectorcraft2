@@ -57,6 +57,7 @@
 	Check Script	Periksa skrip
 	Other Script…	Skrip lain…
 	Document Setup…	Pengaturan dokumen…
+	Switch Units	Ganti satuan
 	Document Color Mode	Mode warna dokumen
 	CMYK Color	Warna CMYK
 	RGB Color	Warna RGB
@@ -1886,6 +1887,10 @@ lighting	Light	Cahaya
 	Outer Corner Tile	Ubin sudut luar
 	Side Tile	Ubin sisi
 	Inner Corner Tile	Ubin sudut dalam
+	Auto-Centered	Otomatis-tengah
+	Auto-Between	Otomatis-antara
+	Auto-Sliced	Otomatis-iris
+	Auto-Overlap	Otomatis-tumpang
 	Start Tile	Ubin awal
 	End Tile	Ubin akhir
 	Fit	Pas
@@ -4192,6 +4197,7 @@ imageTrace	Outline	Kontur
 @msg	not in pattern editing mode	tidak dalam mode pengeditan pola
 @msg	nothing encoded	tidak ada yang dikodekan
 @msg	nothing selected	tidak ada yang dipilih
+@msg	nothing selected is in a group	tidak ada yang dipilih yang berada dalam grup
 @msg	nothing to align	tidak ada yang dapat disejajarkan
 @msg	nothing to distort	tidak ada yang dapat didistorsi
 @msg	nothing to export: the document has no visible art (or turn on Use Artboards)	tidak ada yang dapat diekspor: dokumen tidak memiliki karya seni yang terlihat (atau aktifkan Gunakan Artboard)
@@ -4257,6 +4263,7 @@ imageTrace	Outline	Kontur
 @msg	select an object in perspective	pilih objek dalam perspektif
 @msg	select artwork (or a colour group) to recolor	pilih karya seni (atau grup warna) untuk diwarnai ulang
 @msg	select at least two objects	pilih setidaknya dua objek
+@msg	exit isolation mode first	keluar dari mode isolasi terlebih dahulu
 @msg	select objects, not layers	pilih objek, bukan lapisan
 @msg	select one path, or give its `id`	pilih satu jalur, atau berikan `id`-nya
 @msg	select paths to join	pilih jalur yang akan digabungkan
@@ -4311,6 +4318,7 @@ imageTrace	Outline	Kontur
 @msg	the object already has an opacity mask	objek sudah memiliki masker opasitas
 @msg	the object has no geometry	objek tidak memiliki geometri
 @msg	the object has no opacity mask	objek tidak memiliki masker opasitas
+@msg	stop editing the opacity mask first	hentikan pengeditan masker opasitas terlebih dahulu
 @msg	the object has no stroke	objek tidak memiliki goresan
 @msg	the object is beyond the plane's horizon	objek berada di luar horizon bidang
 @msg	the object isn't in perspective	objek tidak dalam perspektif
@@ -5032,7 +5040,7 @@ mark-style	Japanese	Jepang
 	This system has no screen color sampler	Sistem ini tidak memiliki pengambil warna layar
 	Color blindness – Tritanopia-type	Buta warna – tipe Tritanopia
 	Panels Except Tools and Control	Semua panel kecuali Alat dan Kontrol
-	Reset Tracking and Kerning	Atur ulang pelacakan dan kerning
+	Reset Tracking and Kerning	Atur ulang tracking dan kerning
 	Reset Horizontal Scale	Atur ulang skala horizontal
 @msg	span must be "object" or "selection", got {v}	span harus "object" atau "selection", diterima {v}
 @msg	span: "selection" places a `gradient`, not a swatch	span: "selection" menempatkan `gradient`, bukan swatch
@@ -5369,7 +5377,7 @@ swatch	Bright Violet	Violet cerah
 	Word Spacing:	Spasi Kata:
 	Letter Spacing:	Spasi Huruf:
 	Glyph Scaling:	Penskalaan Glif:
-	Auto Leading:	Spasi Baris Otomatis:
+	Auto Leading:	Leading otomatis:
 	Single Word Justification:	Perataan Kata Tunggal:
 	Full Justify	Rata Penuh
 	Minimum must not exceed Desired, nor Desired Maximum.	Minimum tidak boleh melebihi Diinginkan, dan Diinginkan tidak boleh melebihi Maksimum.

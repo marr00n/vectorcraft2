@@ -1952,6 +1952,10 @@ font-technology	Variable	Variables
 	Outer Corner Tile	Carreau d'angle extérieur
 	Side Tile	Carreau latéral
 	Inner Corner Tile	Carreau d'angle intérieur
+	Auto-Centered	Auto-centré
+	Auto-Between	Auto-entre
+	Auto-Sliced	Auto-biseauté
+	Auto-Overlap	Auto-chevauchement
 	Start Tile	Carreau de début
 	End Tile	Carreau de fin
 	Fit	Ajustement
@@ -3221,6 +3225,7 @@ font-technology	Variable	Variables
 	Swatch Options…	Options de nuance…
 	Swatch Tiles	Carreaux de nuances
 	Swatches	Nuancier
+	Switch Units	Changer d’unités
 	Switch workspace	Changer d’espace de travail
 	Add Content	Ajouter du contenu
 	Click to apply to the selected type	Cliquez pour l’appliquer au texte sélectionné
@@ -3918,6 +3923,7 @@ axis	Both	Les deux
 @msg	`{key}` must be between {min} and {max} (got {x})	`{key}` doit être compris entre {min} et {max} (reçu : {x})
 @msg	`{key}` must be one of {_1}	`{key}` doit valoir l’une de ces valeurs : {_1}
 @msg	`{key}` must be true or false	`{key}` doit valoir true ou false
+@msg	`top` and `below` can't both be true	`top` et `below` ne peuvent pas valoir true tous les deux
 @msg	`select` must be true or false	`select` doit valoir true ou false
 @msg	`minAnchors` and `maxAnchors` must be whole numbers	`minAnchors` et `maxAnchors` doivent être des nombres entiers
 @msg	`{key}` must be a number not below 0	`{key}` doit être un nombre supérieur ou égal à 0
@@ -4181,6 +4187,7 @@ axis	Both	Les deux
 @msg	not in pattern editing mode	pas en mode d’édition de motif
 @msg	nothing encoded	rien n’a été encodé
 @msg	nothing selected	aucune sélection
+@msg	nothing selected is in a group	aucun élément sélectionné ne se trouve dans un groupe
 @msg	nothing to align	rien à aligner
 @msg	nothing to distort	rien à déformer
 @msg	nothing to export: the document has no visible art (or turn on Use Artboards)	rien à exporter : le document n’a aucune illustration visible (ou activez Utiliser les plans de travail)
@@ -4254,6 +4261,7 @@ axis	Both	Les deux
 @msg	select an object in perspective	sélectionnez un objet en perspective
 @msg	select artwork (or a colour group) to recolor	sélectionnez l’illustration (ou un groupe de couleurs) dont redéfinir les couleurs
 @msg	select at least two objects	sélectionnez au moins deux objets
+@msg	exit isolation mode first	quittez d’abord le mode Isolation
 @msg	select objects, not layers	sélectionnez des objets, pas des calques
 @msg	select one path, or give its `id`	sélectionnez un tracé ou indiquez son `id`
 @msg	select paths to join	sélectionnez les tracés à joindre
@@ -4310,6 +4318,7 @@ axis	Both	Les deux
 @msg	the object already has an opacity mask	l’objet a déjà un masque d’opacité
 @msg	the object has no geometry	l’objet n’a pas de géométrie
 @msg	the object has no opacity mask	l’objet n’a pas de masque d’opacité
+@msg	stop editing the opacity mask first	arrêtez d’abord la modification du masque d’opacité
 @msg	the object has no stroke	l’objet n’a pas de contour
 @msg	the object is beyond the plane's horizon	l’objet est au-delà de l’horizon du plan
 @msg	the object isn't in perspective	l’objet n’est pas en perspective

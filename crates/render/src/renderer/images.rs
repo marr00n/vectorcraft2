@@ -1,27 +1,33 @@
-use super::*;
+use super::{
+    Affine, Arc, BezPath, Document, FillRule, Frame, HashMap, Pixmap, Rect, RenderContext, Renderer, Shape, blob_key, blob_pixmap, fill_rule,
+    image_mip, ink, lookup, mip_level, peniko, vello_cpu,
+};
 use crate::images;
 
 impl Renderer {
     pub(crate) fn draw_image(&mut self, ctx: &mut RenderContext, f: &Frame, im: &vectorcraft_doc::ImageObject) {
-        self.draw_image_in(ctx, f, im, None);
+        self.draw_image_in(ctx, f, im, None, false);
     }
 
     /// Draw an image, or with `area` (a region in the document inside the image's frame, see
-    /// [`plain_image`]) the image painted into that region.
+    /// [`plain_image`]) the image painted into that region; with `pixelated`
+    /// ([`vectorcraft_doc::NodeExtras::pixelated`]) without smoothing.
     pub(super) fn draw_image_in(
         &mut self,
         ctx: &mut RenderContext,
         f: &Frame,
         im: &vectorcraft_doc::ImageObject,
         area: Option<&(BezPath, FillRule)>,
+        pixelated: bool,
     ) {
         let rect = Rect::new(0.0, 0.0, im.width as f64, im.height as f64);
         // Outline mode draws the image's frame, and with Document Setup → Show Images in Outline
         // Mode its pixels in greyscale under the frame.
         let outline = f.opts.outline;
         // With mips the full pixels are only looked at (not marked used) until they're drawn, and
-        // a mip the store holds is drawn without them: they may have been dropped (#2820).
-        let mips = f.opts.image_mips;
+        // a mip the store holds is drawn without them: they may have been dropped (#2820). A
+        // pixelated image is drawn from its full pixels: a mip averages them.
+        let mips = f.opts.image_mips && !pixelated;
         let unit = f.view * im.xf * Affine::scale_non_uniform(im.width as f64, im.height as f64);
         let shown = if outline && !f.doc.setup.outline_images {
             None
@@ -36,7 +42,7 @@ impl Renderer {
         if let Some(pm) = shown {
             let sx = im.width as f64 / pm.width().max(1) as f64;
             let sy = im.height as f64 / pm.height().max(1) as f64;
-            let quality = if f.opts.smooth_images { peniko::ImageQuality::Medium } else { peniko::ImageQuality::Low };
+            let quality = if f.opts.smooth_images && !pixelated { peniko::ImageQuality::Medium } else { peniko::ImageQuality::Low };
             let sampler = peniko::ImageSampler { quality, ..Default::default() };
             ctx.set_paint(vello_cpu::Image { image: vello_cpu::ImageSource::Pixmap(pm), sampler });
             match area {

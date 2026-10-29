@@ -1836,6 +1836,10 @@ file-filter	Templates	Mẫu
 	Ink Outlines	Đường bao mực
 	Ink Outlines…	Đường bao mực…
 	Inner Corner Tile	Ô góc trong
+	Auto-Centered	Tự động - Giữa
+	Auto-Between	Tự động - Ở giữa hai cạnh
+	Auto-Sliced	Tự động - Cắt chéo
+	Auto-Overlap	Tự động - Chồng lấp
 	Inner Glow…	Phát sáng trong…
 	Input Black	Đầu vào đen
 	Input White	Đầu vào trắng
@@ -3613,6 +3617,7 @@ mark-style	Japanese	Kiểu Nhật
 	Swatch Options…	Tùy chọn mẫu màu…
 	Swatch Tiles	Ô mẫu màu
 	Swatches	Mẫu màu
+	Switch Units	Chuyển đơn vị
 	Switch workspace	Chuyển không gian làm việc
 	Switch x/y	Đổi x/y
 	Symbol Instance	Thực thể ký hiệu
@@ -4001,7 +4006,9 @@ mark-style	Japanese	Kiểu Nhật
 	X11 (XWayland) When a Pen Is Attached	X11 (XWayland) khi có bút được kết nối
 	If a drawing tablet's pen doesn't draw, choose an X11 (XWayland) option.	Nếu bút của bảng vẽ không vẽ được, hãy chọn một tùy chọn X11 (XWayland).
 	X11 (XWayland)	X11 (XWayland)
+	X:	X:
 	XML ID	XML ID
+	Y:	Y:
 	Yards	Yard
 	Yellow	Vàng
 	Your browser downloads the files (several as one .zip).	Trình duyệt của bạn tải xuống các tệp (một số tệp gộp thành một .zip).
@@ -4101,6 +4108,7 @@ theme	Appearance	Giao diện
 @msg	`{key}` must be between {min} and {max} (got {x})	`{key}` phải nằm trong khoảng {min} đến {max} (nhận được {x})
 @msg	`{key}` must be one of {_1}	`{key}` phải là một trong {_1}
 @msg	`{key}` must be true or false	`{key}` phải là true hoặc false
+@msg	`top` and `below` can't both be true	`top` và `below` không thể cùng là true
 @msg	`select` must be true or false	`select` phải là true hoặc false
 @msg	`minAnchors` and `maxAnchors` must be whole numbers	`minAnchors` và `maxAnchors` phải là số nguyên
 @msg	`{key}` must be a number not below 0	`{key}` phải là một số không nhỏ hơn 0
@@ -4502,6 +4510,7 @@ theme	Appearance	Giao diện
 @msg	not in pattern editing mode	không ở chế độ chỉnh sửa họa tiết
 @msg	nothing encoded	không có gì được mã hóa
 @msg	nothing selected	chưa chọn gì
+@msg	nothing selected is in a group	không mục nào được chọn nằm trong nhóm
 @msg	nothing to align	không có gì để căn chỉnh
 @msg	nothing to distort	không có gì để làm méo
 @msg	nothing to export: the document has no visible art (or turn on Use Artboards)	không có gì để xuất: tài liệu không có tác phẩm hiển thị (hoặc bật Dùng bảng vẽ)
@@ -4617,6 +4626,7 @@ theme	Appearance	Giao diện
 @msg	select an object in perspective	hãy chọn đối tượng trong phối cảnh
 @msg	select artwork (or a colour group) to recolor	hãy chọn tác phẩm (hoặc nhóm màu) để tô lại
 @msg	select at least two objects	hãy chọn ít nhất hai đối tượng
+@msg	exit isolation mode first	hãy thoát chế độ cô lập trước
 @msg	select objects, not layers	hãy chọn đối tượng, không phải lớp
 @msg	select one path, or give its `id`	hãy chọn một đường dẫn hoặc cung cấp `id` của nó
 @msg	select paths or anchor points	chọn đường dẫn hoặc điểm neo
@@ -4695,6 +4705,7 @@ theme	Appearance	Giao diện
 @msg	the object already has an opacity mask	đối tượng đã có mặt nạ độ mờ
 @msg	the object has no geometry	đối tượng không có hình học
 @msg	the object has no opacity mask	đối tượng không có mặt nạ độ mờ
+@msg	stop editing the opacity mask first	hãy dừng chỉnh sửa mặt nạ độ mờ trước
 @msg	the object has no stroke	đối tượng không có nét
 @msg	the object is beyond the plane's horizon	đối tượng vượt qua đường chân trời của mặt phẳng
 @msg	the object isn't in perspective	đối tượng không ở trong phối cảnh
@@ -5028,7 +5039,7 @@ theme	Appearance	Giao diện
 	Word Spacing:	Khoảng cách từ:
 	Letter Spacing:	Khoảng cách chữ:
 	Glyph Scaling:	Tỷ lệ glyph:
-	Auto Leading:	Khoảng cách dòng tự động:
+	Auto Leading:	Giãn dòng tự động:
 	Single Word Justification:	Căn đều một từ:
 	Full Justify	Căn đều hoàn toàn
 	Minimum must not exceed Desired, nor Desired Maximum.	Giá trị tối thiểu không được vượt quá giá trị mong muốn, và giá trị mong muốn không được vượt quá tối đa.

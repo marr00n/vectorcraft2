@@ -1903,6 +1903,10 @@ font-technology	Variable	Variabla
 	Outer Corner Tile	Yttre hörnplatta
 	Side Tile	Sidoruta
 	Inner Corner Tile	Innerhörnsruta
+	Auto-Centered	Auto-centrerad
+	Auto-Between	Auto-mellan
+	Auto-Sliced	Auto-skuren
+	Auto-Overlap	Auto-överlapp
 	Start Tile	Startruta
 	End Tile	Slutruta
 	Fit	Anpassa
@@ -3156,6 +3160,7 @@ font-technology	Variable	Variabla
 	Swatch Options…	Färgrutealternativ…
 	Swatch Tiles	Rutvy för färgrutor
 	Swatches	Färgrutor
+	Switch Units	Byt enheter
 	Switch workspace	Byt arbetslayout
 	Add Content	Lägg till innehåll
 	Click to apply to the selected type	Klicka för att använda på den markerade texten
@@ -3841,6 +3846,7 @@ axis	Both	Båda
 @msg	`{key}` must be between {min} and {max} (got {x})	`{key}` måste vara mellan {min} och {max} (fick {x})
 @msg	`{key}` must be one of {_1}	`{key}` måste vara något av {_1}
 @msg	`{key}` must be true or false	`{key}` måste vara true eller false
+@msg	`top` and `below` can't both be true	`top` och `below` kan inte båda vara true
 @msg	`select` must be true or false	`select` måste vara true eller false
 @msg	`minAnchors` and `maxAnchors` must be whole numbers	`minAnchors` och `maxAnchors` måste vara heltal
 @msg	`{key}` must be a number not below 0	`{key}` måste vara ett tal som inte är under 0
@@ -4099,6 +4105,7 @@ axis	Both	Båda
 @msg	not in pattern editing mode	inte i läget för mönsterredigering
 @msg	nothing encoded	inget kodat
 @msg	nothing selected	inget markerat
+@msg	nothing selected is in a group	inget av det markerade ligger i en grupp
 @msg	nothing to align	inget att justera
 @msg	nothing to distort	inget att förvränga
 @msg	nothing to export: the document has no visible art (or turn on Use Artboards)	inget att exportera: dokumentet har ingen synlig grafik (eller aktivera Använd ritytor)
@@ -4166,6 +4173,7 @@ axis	Both	Båda
 @msg	select an object in perspective	markera ett objekt i perspektiv
 @msg	select artwork (or a colour group) to recolor	markera grafik (eller en färggrupp) att färga om
 @msg	select at least two objects	markera minst två objekt
+@msg	exit isolation mode first	avsluta isoleringsläget först
 @msg	select objects, not layers	markera objekt, inte lager
 @msg	select one path, or give its `id`	markera en bana eller ange dess `id`
 @msg	select paths to join	markera banor att foga samman
@@ -4222,6 +4230,7 @@ axis	Both	Båda
 @msg	the object already has an opacity mask	objektet har redan en opacitetsmask
 @msg	the object has no geometry	objektet saknar geometri
 @msg	the object has no opacity mask	objektet har ingen opacitetsmask
+@msg	stop editing the opacity mask first	sluta redigera opacitetsmasken först
 @msg	the object has no stroke	objektet har ingen kontur
 @msg	the object is beyond the plane's horizon	objektet ligger bortom planets horisont
 @msg	the object isn't in perspective	objektet är inte i perspektiv

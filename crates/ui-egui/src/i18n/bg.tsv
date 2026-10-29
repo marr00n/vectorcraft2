@@ -1903,6 +1903,10 @@ font-technology	Variable	Променливи
 	Outer Corner Tile	Плочка за външен ъгъл
 	Side Tile	Странична плочка
 	Inner Corner Tile	Плочка за вътрешен ъгъл
+	Auto-Centered	Авто-центрирана
+	Auto-Between	Авто-между
+	Auto-Sliced	Авто-срязана
+	Auto-Overlap	Авто-застъпване
 	Start Tile	Начална плочка
 	End Tile	Крайна плочка
 	Fit	Пълно прилягане
@@ -2990,10 +2994,10 @@ font-technology	Variable	Променливи
 	Sixth Space	Шесто разстояние
 	Size	Размер
 	Size Tile to Art	Оразмеряване на плочката според обектите
-	Size/Leading	Размер/Интервал
+	Size/Leading	Размер/междуредие
 	Size:	Размер:
 	Ridges per segment:	Изпъкналости на сегмент:
-	Size: {size}  Tracking: {tracking}	Размер: {size}  Интервал: {tracking}
+	Size: {size}  Tracking: {tracking}	Размер: {size}  Разредка: {tracking}
 	Skew	Искавяване
 	Skin Tone Ramps	Градиенти за цвят на кожата
 	Skip Blank Artboards	Пропускане на празни работни области
@@ -3156,6 +3160,7 @@ font-technology	Variable	Променливи
 	Swatch Options…	Опции на образец…
 	Swatch Tiles	Плочки на образец
 	Swatches	Образци
+	Switch Units	Превключване на мерните единици
 	Switch workspace	Превключване на работната среда
 	Add Content	Добавяне на съдържание
 	Click to apply to the selected type	Щракнете, за да приложите към избрания текст
@@ -3665,8 +3670,8 @@ imageTrace	Outline	Контур
 	  — {n} characters from another font	  — {n} знака от друг шрифт
 	[Normal Character Style]	[Нормален стил на знак]
 	[Normal Paragraph Style]	[Нормален стил на абзац]
-	Top-to-Top Leading	Разстояние между редовете отгоре до горе
-	Bottom-to-Bottom Leading	Разстояние между редовете отдолу до долу
+	Top-to-Top Leading	Междуредие отгоре до горе
+	Bottom-to-Bottom Leading	Междуредие отдолу до долу
 	Burasagari	Бурасагари
 	Force	Принудително
 	About	Относно
@@ -4087,6 +4092,7 @@ axis	Both	И двете
 @msg	not in pattern editing mode	не е в режим на редактиране на мостра
 @msg	nothing encoded	нищо не е кодирано
 @msg	nothing selected	нищо не е избрано
+@msg	nothing selected is in a group	нищо от избраното не е в група
 @msg	nothing to align	няма нищо за подравняване
 @msg	nothing to distort	няма нищо за изкривяване
 @msg	nothing to export: the document has no visible art (or turn on Use Artboards)	няма нищо за експортиране: документът няма видима графика (или включете „Използване на работни области“)
@@ -4154,6 +4160,7 @@ axis	Both	И двете
 @msg	select an object in perspective	изберете обект в перспектива
 @msg	select artwork (or a colour group) to recolor	изберете графика (или цветова група) за преоцветяване
 @msg	select at least two objects	изберете поне два обекта
+@msg	exit isolation mode first	първо излезте от режима на изолация
 @msg	select objects, not layers	изберете обекти, а не слоеве
 @msg	select one path, or give its `id`	изберете един път или задайте неговия `id`
 @msg	select paths to join	изберете пътища за обединяване
@@ -4210,6 +4217,7 @@ axis	Both	И двете
 @msg	the object already has an opacity mask	обектите вече имат маска за непрозрачност
 @msg	the object has no geometry	обектът няма геометрия
 @msg	the object has no opacity mask	обектът няма маска за непрозрачност
+@msg	stop editing the opacity mask first	първо спрете редактирането на маската за непрозрачност
 @msg	the object has no stroke	обектът няма щрих
 @msg	the object is beyond the plane's horizon	обектът е извън хоризонта на равнината
 @msg	the object isn't in perspective	обектът не е в перспектива
@@ -5374,7 +5382,7 @@ theme	Appearance	Външен вид
 	Word Spacing:	Разстояние между думите:
 	Letter Spacing:	Разстояние между буквите:
 	Glyph Scaling:	Мащабиране на знаците:
-	Auto Leading:	Автоматична междуредова разредка:
+	Auto Leading:	Автоматично междуредие:
 	Single Word Justification:	Подравняване на единична дума:
 	Full Justify	Пълно двустранно
 	Minimum must not exceed Desired, nor Desired Maximum.	Минималната стойност не може да надвишава желаната, нито желаната – максималната.

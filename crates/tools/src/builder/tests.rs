@@ -60,6 +60,40 @@ fn shape_builder_drag_emits_merge() {
     assert!(v["points"].as_array().unwrap().len() >= 2);
 }
 
+/// Escape during a merge drag, an Alt erase drag or a Shift marquee cancels it: the tool takes
+/// the key, nothing stays highlighted, and the release merges and deletes nothing. Enter leaves
+/// the drag alone, and with no drag Escape is not the tool's.
+#[test]
+fn escape_cancels_a_shape_builder_drag() {
+    let (d, a, b) = two_rects();
+    let mut s = Selection::default();
+    s.set([a, b]);
+    let p = paint();
+    let cx = cx(&d, &s, &p);
+    let alt = Mods { alt: true, ..Mods::default() };
+    let shift = Mods { shift: true, ..Mods::default() };
+    for (what, mods) in [("merge", Mods::default()), ("erase", alt), ("marquee", shift)] {
+        let mut t = ShapeBuilderTool::default();
+        t.pointer(&cx, &ev(PointerKind::Down, 25.0, 50.0).with_mods(mods));
+        t.pointer(&cx, &ev(PointerKind::Drag, 75.0, 60.0).with_mods(mods));
+        assert!(!t.touched.is_empty(), "{what}");
+        assert!(t.key(&cx, ToolKey::Enter, Mods::default()).is_empty(), "{what}: Enter leaves the drag alone");
+        assert!(t.busy(), "{what}");
+        assert!(t.claims_key(&cx, ToolKey::Escape), "{what}: Escape is the tool's during the drag");
+        assert!(t.key(&cx, ToolKey::Escape, Mods::default()).is_empty(), "{what}: no interaction began, so none is canceled");
+        assert!(!t.busy(), "{what}");
+        assert!(t.overlays(&cx).is_empty(), "{what}: nothing stays highlighted");
+        assert!(t.pointer(&cx, &ev(PointerKind::Drag, 125.0, 70.0).with_mods(mods)).is_empty(), "{what}");
+        assert!(t.pointer(&cx, &ev(PointerKind::Up, 125.0, 70.0).with_mods(mods)).is_empty(), "{what}: the release merges nothing");
+        assert!(!t.claims_key(&cx, ToolKey::Escape), "{what}: with no drag, Escape is not the tool's");
+        // The next drag merges as before.
+        t.pointer(&cx, &ev(PointerKind::Down, 25.0, 50.0));
+        t.pointer(&cx, &ev(PointerKind::Drag, 75.0, 50.0));
+        let acts = t.pointer(&cx, &ev(PointerKind::Up, 75.0, 50.0));
+        assert!(matches!(acts.as_slice(), [Action::Exec(id, _)] if id == "shapeBuilder.merge"), "{what}: {acts:?}");
+    }
+}
+
 #[test]
 fn shape_builder_rebuilds_its_map_for_a_new_revision_at_the_same_address() {
     let (mut d, a, b) = two_rects();

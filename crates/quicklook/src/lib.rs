@@ -17,6 +17,10 @@
 //! it builds everywhere (its tests and the engine's import fuzzing run on Linux), while the
 //! Objective-C side (`mac`, objc2) builds on macOS only.
 
+// `deny`, not `forbid`: the Objective-C side (`mac`, macOS only) needs `unsafe` and allows it for
+// that module alone, as `apps/vectorcraft` does for AppKit. Everything else may not use it.
+#![deny(unsafe_code)]
+
 use std::io::Read as _;
 use std::path::Path;
 use std::sync::atomic::{AtomicU8, AtomicUsize, Ordering};

@@ -161,7 +161,12 @@ pub const UI_COMMANDS: &[(&str, &str, &str, &str)] = &[
     ("view.trimView", "Trim View", "", "{} toggle: hide everything outside the artboards"),
     ("view.cornerWidget", "Hide Corner Widget", "", "{} toggle the live corner widgets"),
     ("view.snapToPixel", "Snap to Pixel", "", "{} toggle: drawing and moving land on whole pixels"),
-    ("view.snapToGlyph", "Snap to Glyph", "", "{} toggle: drawing snaps to live-text baselines and glyph bounds"),
+    (
+        "view.snapToGlyph",
+        "Snap to Glyph",
+        "",
+        "{} toggle: drawing snaps to live-text glyph bounds, and on a single line of type to its baseline, x-height, character widths and glyph anchor points",
+    ),
     (
         "view.preciseCursors",
         "Precise Cursors",
