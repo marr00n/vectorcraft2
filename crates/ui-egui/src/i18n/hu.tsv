@@ -3100,6 +3100,10 @@ mark-style	Japanese	Japán
 	Release Opacity Mask	Átlátszósági maszk megszüntetése
 	Release Selection	Kijelölés felszabadítása
 	Release Shaper Group	Alakformáló csoport megszüntetése
+	Remove from Shaper Group	Eltávolítás az alakformáló csoportból
+@msg	source must be the id of a Shaper Group's original shape	A source értékének egy alakformáló csoport eredeti alakzatának azonosítójának kell lennie
+@msg	group must be the id of a Shaper Group	A group értékének egy alakformáló csoport azonosítójának kell lennie
+@msg	the shape is not an editable original shape of that Shaper Group	Az alakzat nem szerkeszthető eredeti alakzata ennek az alakformáló csoportnak
 	Release Text Wrap	Körbefuttatás megszüntetése
 	Release to Layers (Build)	Szétosztás rétegekre (építkezve)
 	Release to Layers (Sequence)	Szétosztás rétegekre (sorozatként)
@@ -4169,6 +4173,7 @@ mark-style	Japanese	Japán
 	Unlock Variables	Változók zárolásának feloldása
 	Unnamed Objects	Névtelen objektumok
 	Unprintable margin:	Nem nyomtatható margó:
+	Unselected Artwork	A nem kijelölt grafika
 	Unsharp Mask	Életlenítő maszk
 	Unsharp Mask…	Életlenítő maszk…
 	Unshift	Eltolás visszavonása
@@ -4772,6 +4777,7 @@ imageTrace	Outline	Körvonal
 @msg	no current layer	nincs aktuális réteg
 @msg	no data	nincs adat
 @msg	no dialog open	nincs nyitott párbeszédablak
+@msg	the open dialog has no Reset	a nyitott párbeszédablakban nincs Visszaállít gomb
 @msg	no document	nincs dokumentum
 @msg	no document open	nincs megnyitott dokumentum
 @msg	no effect applied yet	még nincs alkalmazott effektus

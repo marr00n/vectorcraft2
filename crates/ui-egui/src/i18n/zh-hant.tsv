@@ -2232,6 +2232,7 @@ file-filter	Templates	範本
 @msg	can't parse shortcut `{c}`	無法剖析快速鍵 `{c}`
 @msg	can't parse shortcut `{s}` for `{k}`	無法剖析 `{k}` 的快速鍵 `{s}`
 @msg	no dialog open	沒有開啟的對話框
+@msg	the open dialog has no Reset	開啟的對話框沒有「重設」按鈕
 @msg	no file reader	沒有檔案讀取器
 @msg	no file writer	沒有檔案寫入器
 @msg	not a VectorCraft shortcut set (missing `overrides`)	不是 VectorCraft 快速鍵組 (沒有 `overrides`)
@@ -4285,6 +4286,7 @@ font-script	Japanese	漢字
 	Unlock Guides	解除鎖定參考線
 	Unnamed Objects	未命名物件
 	Unprintable margin:	不可列印邊界：
+	Unselected Artwork	未選取的圖稿
 	Unshift	取消位移
 	Untitled	未命名
 	Update Link	更新連結
@@ -4639,6 +4641,10 @@ axis	Both	兩者
 	Shaper	Shaper
 	Expand Shaper Group	展開 Shaper 群組
 	Release Shaper Group	釋放 Shaper 群組
+	Remove from Shaper Group	從 Shaper 群組中移除
+@msg	source must be the id of a Shaper Group's original shape	source 必須是 Shaper 群組中原始形狀的 ID
+@msg	group must be the id of a Shaper Group	group 必須是 Shaper 群組的 ID
+@msg	the shape is not an editable original shape of that Shaper Group	該形狀不是該 Shaper 群組中可編輯的原始形狀
 	Select Shaper Face	選取 Shaper 區域
 	Constrain	強制
 	Free Transform	任意變形

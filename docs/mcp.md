@@ -504,7 +504,8 @@ Errors (unknown tool, bad arguments, a disabled or failing command) come back as
 
 Swatches go through `run_command`: `swatch.list` lists every swatch with its colour group, kind and colour;
 `swatch.edit {name, newName?, color?, mode?, global?, spot?}` edits one (fills, strokes and text linked to a
-global or spot swatch follow its colour and name, as one undo step); `swatch.delete {names, unlink?}` deletes
+global or spot swatch follow its colour and name, as one undo step, in the art, opacity masks, symbols, graph
+designs, pattern tiles, graphic styles and the art of brushes); `swatch.delete {names, unlink?}` deletes
 swatches and colour groups in one undo step (art using a deleted global swatch keeps its colour, unlinked).
 `swatch.new {color?, mode?, spot?, global?, group?}` saves a colour (into a colour group with `group`), gradient
 or pattern; `swatch.newGroup {fromArtwork: true, toGlobal?, includeTints?}` makes a colour group of the selected
@@ -1103,7 +1104,7 @@ The transform, Align, Object Properties and Live Shape Properties commands refus
 that is not true or false with `` `strokes` must be true or false ``, naming the key, and leave the document and its
 undo history as they were: the options `copy`, `strokes`, `corners`, `patterns`, `objects` and `typeAreas` in
 `object.transform`, `object.move`, `object.nudge`, `object.rotate`, `object.scale`, `object.reflect`, `object.shear`,
-`object.transformAgain` and `object.setBounds`; `anchors` in `object.transform`; `big` in `object.nudge`;
+`object.transformAgain` and `object.setBounds`; `anchors` and `releaseOutside` in `object.transform`; `big` in `object.nudge`;
 `absolute` in `object.rotate`; `proportional` in `object.setBounds`; `patterns` in `object.align`, `object.distribute`
 and `object.distributeSpacing`; `visible`, `locked`, `isolate` and `knockoutShape` in `object.setProps`; and
 `invertPie`, `makeSidesEqual` and `relativeRadii` in `object.setLiveShape`. A null is read as a key left out.
@@ -1368,6 +1369,14 @@ and `dataset.prev` also deselect every selected object that is hidden or locked 
 moved into a hidden or locked layer or group, or objects that a data set hides. The key object is cleared when it
 is one of them, and `edit.undo` selects them again with the key object.
 
+`object.hide.unselected` (Object › Hide › Unselected Artwork, Cmd+Alt+Shift+3) hides, in one undo step, every
+object that `select.all` takes and that is neither selected nor holds a selected object, and returns `{count}`. In a
+group that holds a selected object it hides the group's other members one by one; a clip group, a compound path or
+another object that holds a selected object stays as it is with its members. While Lock Guides is on it leaves the
+guide paths as they are. The selection stays as it is, and `object.showAll` shows the objects again. With nothing to
+hide it records no undo step. In isolation mode the menu item is disabled, and the command returns the error "exit
+isolation mode first" and changes nothing.
+
 These Select menu commands select only the objects that `select.all` selects and the objects inside them: every
 `select.same.*` and `select.object.*` command except `select.object.slices`, `select.nextAbove`, `select.nextBelow`
 and `select.recall`. They leave out hidden and locked objects with the objects inside them, the objects on hidden,
@@ -1379,6 +1388,19 @@ everything in it, and `select.all`, `select.allOnArtboard` and `select.inverse` 
 `select.nextAbove` and `select.nextBelow` select the nearest such object above or below the first selected object
 among the objects beside it in its group or layer, passing over hidden and locked objects and sublayers. When there
 is no such object, the selection stays as it is.
+
+## Shaper Groups
+
+`shaper.releaseSource {source, group?}` takes the original shape `source` out of its Shaper Group: the shape becomes a
+path just above the group with its own fill and stroke, and is selected. The group's result is computed again from the
+original shapes left, and a group left with none is removed. When `group` is given, it must be the Shaper Group that
+holds `source`. A source that is not an original shape of an editable Shaper Group is an error, and the document and its
+undo history stay as they were. The command returns `{id}`, the shape's id, and records one undo step, Remove from Shaper
+Group. Construction mode ends when the group was in it.
+
+`object.transform` with `releaseOutside: true` does the same for each moved original shape whose bounds end wholly
+outside the bounds the group's original shapes had before the move, in the move's undo step. A shape whose bounds still
+overlap them only moves. The Selection tool sends it at the end of a move in Construction mode.
 
 ## Global Edit
 
@@ -2674,8 +2696,10 @@ changes size, and type keeps its character strokes' weight. With Scale Corners o
 size. The journal entry of a scaling command records the `strokes` and `corners` it used, so actions replay alike.
 `object.transformAgain` applies the last transform's matrix with the `copy`, `strokes`, `corners`, `patterns` and
 `typeAreas` values that transform used, and a true or false value given in its own params takes precedence. After a
-drag of art without a pattern, `patterns` follows the preference `transformPatternTiles`. Its journal entry records
-the `strokes`, `corners` and `patterns` it used, as a transform's does.
+drag of art without a pattern, `patterns` follows the preference `transformPatternTiles`. After a Direct Selection or
+Group Selection drag that moved direct-selected anchors (`path.moveAnchors`), it moves the selected anchors and the
+objects selected whole by the same distance. Its journal entry records the `strokes`, `corners` and `patterns` it
+used, as a transform's does.
 
 ```json
 {"name":"run_command","arguments":{"command":"object.scale","params":{"sx":200,"strokes":true}}}
@@ -2897,7 +2921,8 @@ The Selection & Anchor Display and General preferences apply to `pointer_gesture
   Transform Patterns) and of the same param on the commands that move or duplicate art with an artboard (`artboard.move`
   and the Artboard tool, `artboard.duplicate`, `artboard.rearrange`, `artboard.setProps`): pattern fills and strokes
   move with the art. `object.nudge` (the arrow keys) and `path.moveAnchors` (a Direct Selection drag of selected
-  anchors) take the same param, with the same default, for the objects they move whole.
+  anchors, and a Direct Selection or Group Selection drag from an object while anchors are selected) take the same
+  param, with the same default, for the objects they move whole.
 - `selectSameTintPercent` (off by default): `select.same.fillColor`, `strokeColor` and `fillAndStroke` take every tint
   of a global or spot swatch; on, only the same tint.
 
@@ -5051,7 +5076,9 @@ active the active artboard (the navigator's and the Artboards panel's).
 `tool.options {tool}` opens what double-clicking the tool's button opens (its params doc lists every tool), in the
 desktop app. The Flare tool's are its Flare Tool Options (dialog `flareOptions`): `diameter` and `pathLength` (pt),
 `opacity`, `brightness`, `growth`, `fuzziness`, `longest`, `rayFuzziness` and `largest` (%), `rays`, `rings`,
-`direction` (°), and `raysOn` and `ringsOn` (the Rays and Rings checkboxes; off, the flare has none). OK keeps them
+`direction` (°), and `raysOn` and `ringsOn` (the Rays and Rings checkboxes; off, the flare has none). While Alt
+(Option on macOS) is held, the dialog's Cancel button reads Reset. Reset puts every option back to the tool's default,
+leaves a click's `x` and `y` unchanged and keeps the dialog open; `ui.dialogReset` does the same. OK keeps the options
 (`tool.setOption {tool: "flare", values}`) and the next flare dragged out uses them; a click with the tool opens the
 same dialog, and its OK also draws a flare there. The Artboard tool's are the active artboard's Artboard Options
 (dialog `artboardOptions`; the Artboard tool's active artboard while it is in use, else the window's; its `x` and `y`
@@ -5064,6 +5091,7 @@ for a new artboard, with `new: true` and the name, position and size that `artbo
 `artboard.new` with the fields and makes the new artboard the active one, and Cancel adds no artboard.
 `artboard.new` and `artboard.setProps` trim the white space around `name`, and a blank name gives the artboard its
 default name, "Artboard N" for the Nth artboard.
+A canvas-click dialog also has `preview` (initially on): tentative settings draw at the remembered click, Reset refreshes that preview, and Cancel discards it without persisting settings. OK accepts one flare as one Undo step. Toolbar-only options draw no artwork.
 
 ```json
 {"name":"run_command","arguments":{"command":"tool.setOption","params":{"tool":"flare","values":{"rays":24,"ringsOn":false}}}}

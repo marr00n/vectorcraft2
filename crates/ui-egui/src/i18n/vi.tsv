@@ -2875,6 +2875,10 @@ mark-style	Japanese	Kiểu Nhật
 	Release Opacity Mask	Giải phóng mặt nạ độ mờ
 	Release Selection	Giải phóng vùng chọn
 	Release Shaper Group	Giải phóng nhóm Shaper
+	Remove from Shaper Group	Xóa khỏi nhóm Shaper
+@msg	source must be the id of a Shaper Group's original shape	source phải là mã định danh của một hình gốc trong nhóm Shaper
+@msg	group must be the id of a Shaper Group	group phải là mã định danh của một nhóm Shaper
+@msg	the shape is not an editable original shape of that Shaper Group	hình này không phải là hình gốc có thể chỉnh sửa của nhóm Shaper đó
 	Release to Layers (Build)	Giải phóng ra các lớp (Xây dựng)
 	Release to Layers (Sequence)	Giải phóng ra các lớp (Chuỗi)
 	Release with Perspective	Giải phóng với phối cảnh
@@ -3861,6 +3865,7 @@ mark-style	Japanese	Kiểu Nhật
 	Unlock Variables	Mở khóa biến số
 	Unnamed Objects	Đối tượng chưa đặt tên
 	Unprintable margin:	Lề không in được:
+	Unselected Artwork	Tác phẩm không được chọn
 	Unsharp Mask	Tăng độ sắc nét
 	Unsharp Mask…	Tăng độ sắc nét…
 	Unshift	Bỏ dịch chuyển
@@ -4420,6 +4425,7 @@ theme	Appearance	Giao diện
 @msg	no current layer	không có lớp hiện tại
 @msg	no data	không có dữ liệu
 @msg	no dialog open	không có hộp thoại đang mở
+@msg	the open dialog has no Reset	hộp thoại đang mở không có nút Đặt lại
 @msg	no document	không có tài liệu
 @msg	no document open	không có tài liệu nào đang mở
 @msg	no effect applied yet	chưa áp dụng hiệu ứng

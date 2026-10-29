@@ -63,6 +63,9 @@ impl eframe::App for App {
             let inset = mac_window::center_buttons(frame, ui.ctx().zoom_factor(), bar);
             self.app.titlebar_inset = inset.unwrap_or(mac_window::DEFAULT_INSET);
         }
+        // macOS converts the frame from sRGB to the display's profile (#2249).
+        #[cfg(all(target_os = "macos", feature = "wgpu"))]
+        super::mac_color_space::tag(ui);
         file_access::unconfined(|| self.app.ui(ui));
         // Preferences are written when confirmed, not only at exit: a session ended any other way
         // (the system shutting down, the process ended or crashing) used to lose them (#1747).

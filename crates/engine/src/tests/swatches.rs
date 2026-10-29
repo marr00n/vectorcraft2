@@ -528,3 +528,203 @@ fn global_swatch_edits_reach_opacity_mask_art() {
     run(&mut s, "edit.undo", json!({}));
     assert_eq!(mask_fill(&s).color(), Some(Color::rgb(1.0, 1.0, 1.0)));
 }
+
+/// The fills of graph design "Bar" and of the art of brush "Holder", as `place: color, link`.
+fn fills_outside_the_layers(s: &Session) -> Vec<String> {
+    let d = doc(s);
+    let mut out = vec![];
+    let mut tree = |place: &str, n: &vectorcraft_doc::Node| {
+        n.walk(&mut |m| {
+            if let Paint::Solid { color, swatch, .. } = m.appearance.fill_paint() {
+                out.push(format!("{place}: {}, {}", color.to_hex(), swatch.as_deref().unwrap_or("-")));
+            }
+        })
+    };
+    tree("design", &d.graph_designs.iter().find(|g| g.name == "Bar").unwrap().art);
+    vectorcraft_brush::find(d, "Holder").unwrap().art().into_iter().for_each(|n| tree("brush art", n));
+    out
+}
+
+/// A global swatch edit that recolors a Hue Shift brush's key color in its art moves the key to the
+/// new color, so strokes still paint that art with the stroke color.
+#[test]
+fn global_swatch_edits_move_a_hue_shift_key() {
+    let mut s = session();
+    run(&mut s, "swatch.new", json!({"name": "Tone", "color": "#ff0000", "global": true}));
+    let id = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"swatch": "Tone", "ids": [id.0]}));
+    run(&mut s, "paint.setStroke", json!({"none": true, "ids": [id.0]}));
+    run(&mut s, "brush.new", json!({"type": "art", "name": "Key", "ids": [id.0], "params": {"colorization": {"method": "hueShift"}}}));
+    let key = |s: &mut Session| run(s, "brush.get", json!({"name": "Key"}))["colorization"]["key"].clone();
+    let (red, blue) = (json!(Color::rgb(1.0, 0.0, 0.0)), json!(Color::rgb(0.0, 0.0, 1.0)));
+    assert_eq!(key(&mut s), red);
+    run(&mut s, "swatch.edit", json!({"name": "Tone", "color": "#0000ff"}));
+    assert_eq!(key(&mut s), blue);
+    run(&mut s, "edit.undo", json!({}));
+    assert_eq!(key(&mut s), red);
+
+    // A paint in the key color that only an opacity mask uses leaves the key where it is.
+    run(&mut s, "swatch.new", json!({"name": "MaskTone", "color": "#ff0000", "global": true}));
+    let obj = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"color": "#ff0000", "ids": [obj.0]}));
+    run(&mut s, "paint.setStroke", json!({"none": true, "ids": [obj.0]}));
+    let m = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"swatch": "MaskTone", "ids": [m.0]}));
+    run(&mut s, "select.set", json!({"ids": [obj.0, m.0]}));
+    run(&mut s, "transparency.makeOpacityMask", json!({"clip": true, "invert": false}));
+    run(&mut s, "brush.new", json!({"type": "art", "name": "Masked", "ids": [obj.0], "params": {"colorization": {"method": "hueShift"}}}));
+    let masked = |s: &mut Session| run(s, "brush.get", json!({"name": "Masked"}))["colorization"]["key"].clone();
+    assert_eq!(masked(&mut s), red);
+    run(&mut s, "swatch.edit", json!({"name": "MaskTone", "color": "#0000ff"}));
+    assert_eq!(masked(&mut s), red);
+
+    // With the art and its mask on one swatch, the key takes the art's new color, not the mask's.
+    run(&mut s, "swatch.new", json!({"name": "Both", "color": "#ffffff", "global": true}));
+    let obj = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"swatch": "Both", "ids": [obj.0]}));
+    run(&mut s, "paint.setStroke", json!({"none": true, "ids": [obj.0]}));
+    let m = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"swatch": "Both", "tint": 50, "ids": [m.0]}));
+    run(&mut s, "select.set", json!({"ids": [obj.0, m.0]}));
+    run(&mut s, "transparency.makeOpacityMask", json!({"clip": true, "invert": false}));
+    run(&mut s, "brush.new", json!({"type": "art", "name": "Both", "ids": [obj.0], "params": {"colorization": {"method": "hueShift"}}}));
+    run(&mut s, "swatch.edit", json!({"name": "Both", "color": "#0000ff"}));
+    assert_eq!(run(&mut s, "brush.get", json!({"name": "Both"}))["colorization"]["key"], blue);
+}
+
+/// A global swatch edit that recolors brush art keeps the stored library entries that do not parse
+/// as brushes.
+#[test]
+fn global_swatch_edits_keep_unreadable_brush_entries() {
+    let mut s = session();
+    run(&mut s, "swatch.new", json!({"name": "Tone", "color": "#ff0000", "global": true}));
+    let id = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"swatch": "Tone", "ids": [id.0]}));
+    run(&mut s, "brush.new", json!({"type": "art", "name": "Holder", "ids": [id.0]}));
+    let junk = json!({"name": "Unreadable", "kind": 7});
+    let doc = std::sync::Arc::make_mut(&mut s.doc_mut().unwrap().doc);
+    let Some(Value::Array(entries)) = doc.unknown.get_mut(vectorcraft_brush::DOC_KEY) else { panic!("no stored brushes") };
+    entries.push(junk.clone());
+    run(&mut s, "swatch.edit", json!({"name": "Tone", "color": "#0000ff"}));
+    let stored = &s.doc().unwrap().doc.unknown[vectorcraft_brush::DOC_KEY];
+    assert!(stored.as_array().is_some_and(|a| a.contains(&junk)), "{stored}");
+    assert!(vectorcraft_brush::find(&s.doc().unwrap().doc, "Holder").is_some());
+}
+
+/// A global swatch edit that recolors brush art keeps the fields of stored brush entries that the
+/// brush definition does not read, both on the brush it recolors and on the brushes it leaves alone,
+/// and inside the art too. A swatch delete that unlinks the art drops the link and keeps those fields.
+#[test]
+fn global_swatch_edits_keep_unread_brush_fields() {
+    // Adds `"extra": 8` to every object under `v` that links a swatch.
+    fn tag_links(v: &mut Value) {
+        match v {
+            Value::Object(o) => {
+                if o.contains_key("swatch") {
+                    o.insert("extra".into(), json!(8));
+                }
+                o.values_mut().for_each(tag_links);
+            }
+            Value::Array(a) => a.iter_mut().for_each(tag_links),
+            _ => {}
+        }
+    }
+    // The objects under `v` that carry `"extra": 8`.
+    fn tagged(v: &Value) -> Vec<&Value> {
+        match v {
+            Value::Object(o) => o.get("extra").filter(|e| **e == json!(8)).map(|_| v).into_iter().chain(o.values().flat_map(tagged)).collect(),
+            Value::Array(a) => a.iter().flat_map(tagged).collect(),
+            _ => vec![],
+        }
+    }
+    let mut s = session();
+    run(&mut s, "swatch.new", json!({"name": "Tone", "color": "#ff0000", "global": true}));
+    let id = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"swatch": "Tone", "ids": [id.0]}));
+    run(&mut s, "brush.new", json!({"type": "art", "name": "Holder", "ids": [id.0]}));
+    let doc = std::sync::Arc::make_mut(&mut s.doc_mut().unwrap().doc);
+    let Some(Value::Array(entries)) = doc.unknown.get_mut(vectorcraft_brush::DOC_KEY) else { panic!("no stored brushes") };
+    for e in entries.iter_mut() {
+        if let Some(o) = e.as_object_mut() {
+            o.insert("extra".into(), json!(7));
+        }
+        tag_links(e);
+    }
+    let links = tagged(&doc.unknown[vectorcraft_brush::DOC_KEY]).len();
+    assert!(links > 0, "{}", doc.unknown[vectorcraft_brush::DOC_KEY]);
+    run(&mut s, "swatch.edit", json!({"name": "Tone", "color": "#0000ff"}));
+    let stored = &s.doc().unwrap().doc.unknown[vectorcraft_brush::DOC_KEY];
+    let entries = stored.as_array().map(Vec::as_slice).unwrap_or_default();
+    assert!(entries.len() > 1, "{stored}");
+    assert!(entries.iter().all(|e| e["extra"] == json!(7)), "{stored}");
+    assert_eq!(tagged(stored).len(), links, "{stored}");
+    let holder = vectorcraft_brush::find(&s.doc().unwrap().doc, "Holder").unwrap();
+    let fill = holder.art().first().map(|n| n.appearance.fill_paint().color().map(|c| c.to_hex()));
+    assert_eq!(fill, Some(Some("#0000ff".to_string())));
+
+    run(&mut s, "swatch.delete", json!({"name": "Tone"}));
+    let stored = &s.doc().unwrap().doc.unknown[vectorcraft_brush::DOC_KEY];
+    let unlinked = tagged(stored);
+    assert_eq!(unlinked.len(), links, "{stored}");
+    assert!(unlinked.iter().all(|o| o.get("swatch").is_none()), "{stored}");
+    let holder = vectorcraft_brush::find(&s.doc().unwrap().doc, "Holder").unwrap();
+    let fill = holder.art().first().map(|n| n.appearance.fill_paint().color().map(|c| c.to_hex()));
+    assert_eq!(fill, Some(Some("#0000ff".to_string())));
+}
+
+/// A global swatch edit, rename, delete and Default Swatches with replace change the art of graph
+/// designs and brushes: the art follows the swatch's color and name, or keeps its color unlinked,
+/// each in one undo step.
+#[test]
+fn global_swatch_edits_reach_graph_designs_and_brush_art() {
+    let mut s = session();
+    run(&mut s, "swatch.new", json!({"name": "Tone", "color": "#ff0000", "global": true}));
+    for (cmd, p) in [("graph.design", json!({"new": "Bar"})), ("brush.new", json!({"type": "art", "name": "Holder"}))] {
+        let id = rect(&mut s);
+        run(&mut s, "paint.setFill", json!({"swatch": "Tone", "ids": [id.0]}));
+        run(&mut s, "select.set", json!({"ids": [id.0]}));
+        run(&mut s, cmd, p);
+        run(&mut s, "edit.clear", json!({"ids": [id.0]}));
+    }
+    let both = |fill: &str| vec![format!("design: {fill}"), format!("brush art: {fill}")];
+    assert_eq!(fills_outside_the_layers(&s), both("#ff0000, Tone"));
+    let undo = s.doc().unwrap().history.undo.len();
+
+    let r = run(&mut s, "swatch.edit", json!({"name": "Tone", "color": "#0000ff"}));
+    assert_eq!(r["relinked"], 2, "{r}");
+    assert_eq!(fills_outside_the_layers(&s), both("#0000ff, Tone"));
+    assert_eq!(s.doc().unwrap().history.undo.len(), undo + 1);
+    run(&mut s, "edit.undo", json!({}));
+    assert_eq!(fills_outside_the_layers(&s), both("#ff0000, Tone"));
+
+    run(&mut s, "swatch.edit", json!({"name": "Tone", "newName": "Hue"}));
+    assert_eq!(fills_outside_the_layers(&s), both("#ff0000, Hue"));
+    // Default Swatches with replace drops the links to the swatches it removes.
+    run(&mut s, "swatch.resetDefaults", json!({"replace": true}));
+    assert_eq!(fills_outside_the_layers(&s), both("#ff0000, -"));
+    run(&mut s, "edit.undo", json!({}));
+    let r = run(&mut s, "swatch.delete", json!({"name": "Hue"}));
+    assert_eq!(r["unlinked"], 2, "{r}");
+    assert_eq!(fills_outside_the_layers(&s), both("#ff0000, -"));
+    assert_eq!(s.doc().unwrap().history.undo.len(), undo + 2);
+}
+
+/// A global swatch edited while a pattern is being edited also changes the tile that pattern
+/// editing's Cancel puts back.
+#[test]
+fn global_swatch_edits_reach_the_tile_that_pattern_cancel_puts_back() {
+    let mut s = session();
+    run(&mut s, "swatch.new", json!({"name": "Tone", "color": "#ff0000", "global": true}));
+    let id = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"swatch": "Tone", "ids": [id.0]}));
+    run(&mut s, "select.set", json!({"ids": [id.0]}));
+    let pattern = run(&mut s, "object.pattern.make", json!({"edit": false}))["name"].as_str().unwrap().to_string();
+    run(&mut s, "object.pattern.edit", json!({"name": pattern}));
+    run(&mut s, "swatch.edit", json!({"name": "Tone", "color": "#0000ff"}));
+    run(&mut s, "object.pattern.cancel", json!({}));
+    let mut fills = vec![];
+    for n in &doc(&s).pattern(&pattern).unwrap().art {
+        n.walk(&mut |m| fills.push(m.appearance.fill_paint()));
+    }
+    assert_eq!(fills, [Paint::Solid { color: Color::rgb(0.0, 0.0, 1.0), swatch: Some("Tone".into()), tint: 1.0 }]);
+}

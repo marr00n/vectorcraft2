@@ -26,6 +26,8 @@ mod gpu;
 #[cfg(target_os = "linux")]
 mod linux_stylus;
 mod logging;
+#[cfg(all(target_os = "macos", feature = "wgpu"))]
+mod mac_color_space;
 #[cfg(target_os = "macos")]
 mod mac_fonts;
 #[cfg(target_os = "macos")]

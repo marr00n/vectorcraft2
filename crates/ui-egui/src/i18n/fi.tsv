@@ -198,6 +198,7 @@
 	Other Layers	Muut tasot
 	Unlock All	Avaa kaikki lukitukset
 	Hide	Piilota
+	Unselected Artwork	Valitsematon kuvitus
 	Show All	Näytä kaikki
 	Expand…	Laajenna…
 	Expand Appearance	Laajenna ulkoasu
@@ -808,6 +809,10 @@
 	Shaper	Muotoilija
 	Expand Shaper Group	Laajenna muotoilijaryhmä
 	Release Shaper Group	Vapauta muotoilijaryhmä
+	Remove from Shaper Group	Poista muotoilijaryhmästä
+@msg	source must be the id of a Shaper Group's original shape	source-arvon on oltava muotoilijaryhmän alkuperäisen muodon tunnus
+@msg	group must be the id of a Shaper Group	group-arvon on oltava muotoilijaryhmän tunnus
+@msg	the shape is not an editable original shape of that Shaper Group	muoto ei ole kyseisen muotoilijaryhmän muokattava alkuperäinen muoto
 	Select Shaper Face	Valitse muotoilijan pinta
 	Constrain	Rajoita
 	Free Transform	Vapaa muunnos
@@ -4327,6 +4332,7 @@ imageTrace	Outline	Ääriviiva
 @msg	no current layer	ei nykyistä tasoa
 @msg	no data	ei dataa
 @msg	no dialog open	valintaikkunaa ei ole auki
+@msg	the open dialog has no Reset	avoimessa valintaikkunassa ei ole Palauta-painiketta
 @msg	no document	ei asiakirjaa
 @msg	no document open	asiakirjaa ei ole auki
 @msg	no effect applied yet	tehostetta ei ole vielä käytetty

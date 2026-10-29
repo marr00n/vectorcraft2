@@ -485,6 +485,8 @@ separate. Scores and hours unchanged. [Behavior and command details](development
 | 2026-10-11 | minor | Edit Toolbar opens the All Tools drawer beside the toolbar instead of a centred dialog, dims the tools the toolbar holds, and edits the toolbar by drag and drop while it is open (#1018); score unchanged (estimated) |
 | 2026-10-11 | minor | Direct Selection: dragging a path selected whole by an anchor moves it whole; Alt-drag copies by an anchor too, toggles during the drag and snaps onto the original (#1104); score unchanged (estimated) |
 | 2026-10-10 | major | First checklist, built from the tool sources and tests against Illustrator 2026's public documentation |
+| 2026-10-28 | minor | Blob Brush Shift locks after clear axial movement, keeps earlier samples fixed, and waits without an off-axis trail. Activation uses raw press displacement in logical screen pixels, with exact quarter-turn boundaries. Explicit application rule; scores and estimates unchanged. |
+| 2026-10-28 | minor | Flare Tool Options opened by a canvas click previews its settings at that click. Reset refreshes the enabled preview while keeping the dialog open. Cancel discards preview art and tentative options; OK accepts one flare in one Undo step. Editing existing flare artwork remains outside this dialog scope. Scores and estimates unchanged. |
 
 > **Tab-drag status (2026-10-22):** updated from upstream, including the Turkish catalog and all three tab-drag translations requested in #3479; Selection-tool reset regression-checked and clipboard evidence scoped to internal state; drag lifecycle, insertion and regression contracts documented; behavior, scores and estimates unchanged.
 

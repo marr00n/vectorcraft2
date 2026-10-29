@@ -3396,6 +3396,7 @@ font-technology	Variable	Променливи
 	Unlock Guides	Отключване на водачите
 	Unnamed Objects	Безименни обекти
 	Unprintable margin:	Непечатаемо поле:
+	Unselected Artwork	Неизбрани графични елементи
 	Unshift	Преместване назад (Unshift)
 	Untitled	Без заглавие
 	Update Link	Актуализиране на връзката
@@ -4014,6 +4015,7 @@ axis	Both	И двете
 @msg	no current layer	няма текущ слой
 @msg	no data	няма данни
 @msg	no dialog open	няма отворен диалогов прозорец
+@msg	the open dialog has no Reset	отвореният диалогов прозорец няма бутон „Нулиране“
 @msg	no document	няма документ
 @msg	no document open	няма отворен документ
 @msg	no effect applied yet	все още няма приложен ефект
@@ -4408,6 +4410,7 @@ axis	Both	И двете
 	Shaper	Инструмент за форми
 	Expand Shaper Group	Разширяване на групата от форми
 	Release Shaper Group	Освобождаване на групата от форми
+	Remove from Shaper Group	Премахване от групата от форми
 	Select Shaper Face	Избиране на лице на формата
 	Drag art, colors and text styles here to reuse them across documents. Libraries are stored on this machine — no account required.	Плъзнете графика, цветове и текстови стилове тук, за да ги използвате повторно в различни документи. Библиотеките се съхраняват на това устройство — не се изисква акаунт.
 	1 Color Job	Задание с 1 цвят

@@ -190,6 +190,7 @@
 	Other Layers	Andere lagen
 	Unlock All	Alles ontgrendelen
 	Hide	Verbergen
+	Unselected Artwork	Niet-geselecteerde artwork
 	Show All	Alles tonen
 	Expand…	Uitbreiden…
 	Expand Appearance	Uiterlijk uitbreiden
@@ -771,6 +772,7 @@
 	Shaper	Shaper
 	Expand Shaper Group	Shapergroep uitbreiden
 	Release Shaper Group	Shapergroep vrijgeven
+	Remove from Shaper Group	Verwijderen uit shapergroep
 	Select Shaper Face	Shapervlak selecteren
 	Constrain	Beperken
 	Free Transform	Vrij transformeren
@@ -4136,6 +4138,7 @@ imageTrace	Outline	Contour
 @msg	no current layer	geen huidige laag
 @msg	no data	geen gegevens
 @msg	no dialog open	geen dialoogvenster geopend
+@msg	the open dialog has no Reset	het geopende dialoogvenster heeft geen knop Opnieuw instellen
 @msg	no document	geen document
 @msg	no document open	geen document geopend
 @msg	no effect applied yet	nog geen effect toegepast

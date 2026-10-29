@@ -683,6 +683,7 @@ fn lock_and_hide_menus_are_greyed_out_in_isolation_mode() {
             "object.hide",
             "object.hide.above",
             "object.hide.otherLayers",
+            "object.hide.unselected",
             "object.showAll"
         ]
     );
@@ -696,10 +697,10 @@ fn lock_and_hide_menus_are_greyed_out_in_isolation_mode() {
     };
     app.run("object.isolate", json!({"id": g.clone()})).unwrap();
     app.run("select.set", json!({"ids": [b]})).unwrap();
-    assert_eq!(shown(&app), [false, false, false, false, false, false, false, false, true], "in isolation mode");
+    assert_eq!(shown(&app), [false, false, false, false, false, false, false, false, false, true], "in isolation mode");
     app.run("object.exitIsolation", json!({})).unwrap();
     app.run("select.set", json!({"ids": [g]})).unwrap();
-    assert_eq!(shown(&app), [true; 9], "after Exit Isolation Mode");
+    assert_eq!(shown(&app), [true; 10], "after Exit Isolation Mode");
 }
 
 #[test]

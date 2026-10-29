@@ -176,6 +176,7 @@
 	Other Layers	Andre lag
 	Unlock All	Lås alle op
 	Hide	Skjul
+	Unselected Artwork	Ikke-markeret grafik
 	Show All	Vis alle
 	Expand…	Udvid…
 	Expand Appearance	Udvid udseende
@@ -757,6 +758,7 @@
 	Shaper	Shaper
 	Expand Shaper Group	Udvid shapergruppe
 	Release Shaper Group	Frigør shapergruppe
+	Remove from Shaper Group	Fjern fra shapergruppe
 	Select Shaper Face	Markér shaperflade
 	Constrain	Begræns
 	Free Transform	Fri transformering
@@ -4124,6 +4126,7 @@ imageTrace	Outline	Kontur
 @msg	no current layer	intet aktuelt lag
 @msg	no data	ingen data
 @msg	no dialog open	ingen åben dialogboks
+@msg	the open dialog has no Reset	den åbne dialogboks har ingen Nulstil-knap
 @msg	no document	intet dokument
 @msg	no document open	intet åbent dokument
 @msg	no effect applied yet	ingen effekt er anvendt endnu

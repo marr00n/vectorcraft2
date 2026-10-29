@@ -3288,6 +3288,7 @@ font-technology	Variable	Değişken
 	Unlock Guides	Kılavuzların Kilidini Aç
 	Unnamed Objects	Adsız Nesneler
 	Unprintable margin:	Yazdırılamayan kenar boşluğu:
+	Unselected Artwork	Seçili Olmayan Sanat Eserleri
 	Unshift	Kaydırmayı kaldır
 	Untitled	İsimsiz
 	Update Link	Bağlantıyı Güncelle
@@ -3886,6 +3887,7 @@ axis	Both	Her İkisi
 @msg	no current layer	geçerli katman yok
 @msg	no data	veri yok
 @msg	no dialog open	iletişim kutusu açık değil
+@msg	the open dialog has no Reset	açık iletişim kutusunda Sıfırla düğmesi yok
 @msg	no document	belge yok
 @msg	no document open	hiçbir belge açık değil
 @msg	no effect applied yet	henüz hiçbir efekt uygulanmadı
@@ -4269,6 +4271,10 @@ axis	Both	Her İkisi
 	Shaper	Şekillendirici
 	Expand Shaper Group	Shaper Grubunu Genişlet
 	Release Shaper Group	Şekillendirici Grubunu Yayınla
+	Remove from Shaper Group	Şekillendirici Grubundan Kaldır
+@msg	source must be the id of a Shaper Group's original shape	source, bir Şekillendirici Grubunun özgün şeklinin kimliği olmalıdır
+@msg	group must be the id of a Shaper Group	group, bir Şekillendirici Grubunun kimliği olmalıdır
+@msg	the shape is not an editable original shape of that Shaper Group	şekil, o Şekillendirici Grubunun düzenlenebilir özgün şekli değil
 	Select Shaper Face	Şekillendirici Yüz'ü seçin
 	Drag art, colors and text styles here to reuse them across documents. Libraries are stored on this machine — no account required.	Resimleri, renkleri ve metin stillerini belgelerde yeniden kullanmak için buraya sürükleyin. Kitaplıklar bu makinede depolanır; hesap gerekmez.
 	1 Color Job	1 Renk İşi

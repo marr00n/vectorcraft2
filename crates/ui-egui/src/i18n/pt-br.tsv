@@ -2827,6 +2827,7 @@
 	Unlock Guides	Desbloquear Guias
 	Unnamed Objects	Objetos Sem Nome
 	Unprintable margin:	Margem não imprimível:
+	Unselected Artwork	Arte Não Selecionada
 	Unshift	Desfazer Mudança de Cor
 	Update Link	Atualizar Link
 	Update Links	Atualizar Links
@@ -3069,6 +3070,10 @@ imageTrace	Outline	Contorno
 	Shaper	Formador
 	Expand Shaper Group	Expandir Grupo Formador
 	Release Shaper Group	Liberar Grupo Formador
+	Remove from Shaper Group	Remover do Grupo Formador
+@msg	source must be the id of a Shaper Group's original shape	source deve ser o ID de uma forma original de um Grupo Formador
+@msg	group must be the id of a Shaper Group	group deve ser o ID de um Grupo Formador
+@msg	the shape is not an editable original shape of that Shaper Group	a forma não é uma forma original editável desse Grupo Formador
 	Select Shaper Face	Selecionar Face do Formador
 	Constrain	Restringir
 	Free Transform	Transformação Livre
@@ -3685,6 +3690,7 @@ axis	Both	Ambos
 @msg	no current layer	nenhuma camada atual
 @msg	no data	sem dados
 @msg	no dialog open	nenhuma caixa de diálogo aberta
+@msg	the open dialog has no Reset	a caixa de diálogo aberta não tem o botão Redefinir
 @msg	no document	nenhum documento
 @msg	no document open	nenhum documento aberto
 @msg	no effect applied yet	nenhum efeito aplicado ainda

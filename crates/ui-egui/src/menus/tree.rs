@@ -170,7 +170,12 @@ pub fn menu_tree_named(english_names: bool) -> Vec<(&'static str, Vec<Item>)> {
                 c("Unlock All", "object.unlockAll"),
                 sub(
                     "Hide",
-                    vec![c("Selection", "object.hide"), c("All Artwork Above", "object.hide.above"), c("Other Layers", "object.hide.otherLayers")],
+                    vec![
+                        c("Selection", "object.hide"),
+                        c("All Artwork Above", "object.hide.above"),
+                        c("Other Layers", "object.hide.otherLayers"),
+                        c("Unselected Artwork", "object.hide.unselected"),
+                    ],
                 ),
                 c("Show All", "object.showAll"),
                 Sep,

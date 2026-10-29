@@ -3396,6 +3396,7 @@ font-technology	Variable	Variabla
 	Unlock Guides	Lås upp stödlinjer
 	Unnamed Objects	Namnlösa objekt
 	Unprintable margin:	Ej utskrivbar marginal:
+	Unselected Artwork	Omarkerad grafik
 	Unshift	Utan förskjutning
 	Untitled	Namnlös
 	Update Link	Uppdatera länk
@@ -4026,6 +4027,7 @@ axis	Both	Båda
 @msg	no current layer	inget aktuellt lager
 @msg	no data	inga data
 @msg	no dialog open	ingen dialogruta är öppen
+@msg	the open dialog has no Reset	den öppna dialogrutan har ingen Återställ-knapp
 @msg	no document	inget dokument
 @msg	no document open	inget dokument är öppet
 @msg	no effect applied yet	ingen effekt har använts än
@@ -4424,6 +4426,10 @@ axis	Both	Båda
 	Shaper	Formning
 	Expand Shaper Group	Expandera Shaper-grupp
 	Release Shaper Group	Släpp formgivargrupp
+	Remove from Shaper Group	Ta bort från formgivargrupp
+@msg	source must be the id of a Shaper Group's original shape	source måste vara id för en originalform i en formgivargrupp
+@msg	group must be the id of a Shaper Group	group måste vara id för en formgivargrupp
+@msg	the shape is not an editable original shape of that Shaper Group	formen är inte en redigerbar originalform i den formgivargruppen
 	Select Shaper Face	Markera Shaper-yta
 	Drag art, colors and text styles here to reuse them across documents. Libraries are stored on this machine — no account required.	Dra hit grafik, färger och textstilar för att återanvända dem i andra dokument. Biblioteken lagras på den här datorn – inget konto krävs.
 	1 Color Job	1-färgsjobb

@@ -196,6 +196,7 @@ font-technology	Variable	バリアブル
 	Other Layers	その他のレイヤー
 	Unlock All	すべてをロック解除
 	Hide	隠す
+	Unselected Artwork	選択されていないアートワーク
 	Show All	すべてを表示
 	Expand…	分割・拡張…
 	Expand Appearance	アピアランスを分割
@@ -3790,6 +3791,10 @@ theme	Appearance	外観
 	Shaper	Shaper
 	Expand Shaper Group	Shaper グループを拡張
 	Release Shaper Group	Shaper グループを解除
+	Remove from Shaper Group	Shaper グループから削除
+@msg	source must be the id of a Shaper Group's original shape	source には Shaper グループの元のシェイプの ID を指定してください
+@msg	group must be the id of a Shaper Group	group には Shaper グループの ID を指定してください
+@msg	the shape is not an editable original shape of that Shaper Group	そのシェイプはその Shaper グループの編集可能な元のシェイプではありません
 	Select Shaper Face	Shaper の面を選択
 	Constrain	制限
 	Free Transform	自由変形
@@ -4552,6 +4557,7 @@ swatch	Bright Violet	ビビッドバイオレット
 @msg	can't parse shortcut `{c}`	ショートカット `{c}` を解釈できません
 @msg	can't parse shortcut `{s}` for `{k}`	`{k}` のショートカット `{s}` を解釈できません
 @msg	no dialog open	ダイアログが開かれていません
+@msg	the open dialog has no Reset	開いているダイアログにはリセットボタンがありません
 @msg	no file reader	ファイルの読み込み機能がありません
 @msg	no file writer	ファイルの書き込み機能がありません
 @msg	not a VectorCraft shortcut set (missing `overrides`)	VectorCraft のショートカットセットではありません (`overrides` がありません)

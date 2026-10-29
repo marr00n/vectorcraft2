@@ -3495,6 +3495,7 @@ mark-style	Japanese	Японский
 	Unlock Guides	Разблокировать направляющие
 	Unnamed Objects	Объекты без имени
 	Unprintable margin:	Непечатаемое поле:
+	Unselected Artwork	Невыделенный рисунок
 	Unshift	Отменить сдвиг
 	Untitled	Без названия
 	Update Link	Обновить связь
@@ -4148,6 +4149,7 @@ axis	Both	Оба
 @msg	no current layer	нет текущего слоя
 @msg	no data	нет данных
 @msg	no dialog open	нет открытого диалогового окна
+@msg	the open dialog has no Reset	в открытом диалоговом окне нет кнопки «Сбросить»
 @msg	no document	нет документа
 @msg	no document open	нет открытого документа
 @msg	no effect applied yet	эффект ещё не применён
@@ -4554,6 +4556,10 @@ axis	Both	Оба
 	Shaper	Shaper
 	Expand Shaper Group	Разобрать группу Shaper
 	Release Shaper Group	Освободить группу Shaper
+	Remove from Shaper Group	Удалить из группы Shaper
+@msg	source must be the id of a Shaper Group's original shape	source должен быть идентификатором исходной фигуры группы Shaper
+@msg	group must be the id of a Shaper Group	group должен быть идентификатором группы Shaper
+@msg	the shape is not an editable original shape of that Shaper Group	фигура не является редактируемой исходной фигурой этой группы Shaper
 	Select Shaper Face	Выбрать область Shaper
 	Constrain	Ограничить
 	Free Transform	Свободное трансформирование

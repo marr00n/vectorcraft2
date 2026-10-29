@@ -3492,6 +3492,7 @@ effect	Points	Точки
 	Unlock Guides	Розблокувати напрямні
 	Unnamed Objects	Об’єкти без імені
 	Unprintable margin:	Недруковане поле:
+	Unselected Artwork	Невиділений малюнок
 	Unshift	Скасувати зсув
 	Untitled	Без назви
 	Update Link	Оновити зв’язок
@@ -4136,6 +4137,7 @@ axis	Both	Обидві
 @msg	no current layer	немає поточного шару
 @msg	no data	немає даних
 @msg	no dialog open	немає відкритого діалогового вікна
+@msg	the open dialog has no Reset	у відкритому діалоговому вікні немає кнопки «Скинути»
 @msg	no document	немає документа
 @msg	no document open	немає відкритого документа
 @msg	no effect applied yet	ефект ще не застосований
@@ -4540,6 +4542,10 @@ axis	Both	Обидві
 	Shaper	Формоутворення
 	Expand Shaper Group	Розібрати групу формоутворення
 	Release Shaper Group	Звільнити групу формоутворення
+	Remove from Shaper Group	Вилучити з групи формоутворення
+@msg	source must be the id of a Shaper Group's original shape	source має бути ідентифікатором вихідної фігури групи формоутворення
+@msg	group must be the id of a Shaper Group	group має бути ідентифікатором групи формоутворення
+@msg	the shape is not an editable original shape of that Shaper Group	фігура не є редагованою вихідною фігурою цієї групи формоутворення
 	Select Shaper Face	Виділити область формоутворення
 	Constrain	Обмежити
 	Free Transform	Вільне трансформування

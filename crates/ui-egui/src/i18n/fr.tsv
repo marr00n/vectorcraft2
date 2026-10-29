@@ -3461,6 +3461,7 @@ font-technology	Variable	Variables
 	Unlock Guides	Déverrouiller les repères
 	Unnamed Objects	Objets sans nom
 	Unprintable margin:	Marge non imprimable :
+	Unselected Artwork	Illustration non sélectionnée
 	Unshift	Annuler le décalage
 	Untitled	Sans titre
 	Update Link	Mettre à jour le lien
@@ -4109,6 +4110,7 @@ axis	Both	Les deux
 @msg	no current layer	aucun calque actif
 @msg	no data	aucune donnée
 @msg	no dialog open	aucune boîte de dialogue ouverte
+@msg	the open dialog has no Reset	la boîte de dialogue ouverte n’a pas de bouton Réinitialiser
 @msg	no document	aucun document
 @msg	no document open	aucun document ouvert
 @msg	no effect applied yet	aucun effet appliqué pour l’instant
@@ -4515,6 +4517,10 @@ axis	Both	Les deux
 	Shaper	Shaper
 	Expand Shaper Group	Décomposer le groupe Shaper
 	Release Shaper Group	Annuler le groupe Shaper
+	Remove from Shaper Group	Retirer du groupe Shaper
+@msg	source must be the id of a Shaper Group's original shape	source doit être l’identifiant d’une forme d’origine d’un groupe Shaper
+@msg	group must be the id of a Shaper Group	group doit être l’identifiant d’un groupe Shaper
+@msg	the shape is not an editable original shape of that Shaper Group	la forme n’est pas une forme d’origine modifiable de ce groupe Shaper
 	Select Shaper Face	Sélectionner la face Shaper
 	Drag art, colors and text styles here to reuse them across documents. Libraries are stored on this machine — no account required.	Faites glisser ici des illustrations, des couleurs et des styles de texte pour les réutiliser d’un document à l’autre. Les bibliothèques sont enregistrées sur cet ordinateur — aucun compte n’est nécessaire.
 	1 Color Job	Travail 1 couleur

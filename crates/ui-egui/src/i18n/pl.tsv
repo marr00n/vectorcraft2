@@ -156,6 +156,7 @@
 	Other Layers	Pozostałe warstwy
 	Unlock All	Odblokuj wszystko
 	Hide	Ukryj
+	Unselected Artwork	Niezaznaczoną kompozycję
 	Show All	Pokaż wszystko
 	Expand…	Rozszerz…
 	Expand Appearance	Rozszerz wygląd
@@ -766,6 +767,10 @@
 	Shaper	Kształtowanie
 	Expand Shaper Group	Rozszerz grupę kształtowania
 	Release Shaper Group	Uwolnij grupę kształtowania
+	Remove from Shaper Group	Usuń z grupy kształtowania
+@msg	source must be the id of a Shaper Group's original shape	source musi być identyfikatorem oryginalnego kształtu grupy kształtowania
+@msg	group must be the id of a Shaper Group	group musi być identyfikatorem grupy kształtowania
+@msg	the shape is not an editable original shape of that Shaper Group	kształt nie jest edytowalnym oryginalnym kształtem tej grupy kształtowania
 	Select Shaper Face	Zaznacz ścianę kształtowania
 	Constrain	Ogranicz
 	Free Transform	Swobodne przekształcanie
@@ -4239,6 +4244,7 @@ imageTrace	Outline	Kontur
 @msg	no current layer	brak bieżącej warstwy
 @msg	no data	brak danych
 @msg	no dialog open	brak otwartego okna dialogowego
+@msg	the open dialog has no Reset	otwarte okno dialogowe nie ma przycisku Resetuj
 @msg	no document	brak dokumentu
 @msg	no document open	brak otwartego dokumentu
 @msg	no effect applied yet	nie zastosowano jeszcze żadnego efektu

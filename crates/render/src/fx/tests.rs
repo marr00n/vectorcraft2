@@ -278,7 +278,7 @@ fn shaded_doc(mode: vectorcraft_doc::ColorMode, fill: Color, shade: &str, darkne
     d
 }
 
-/// Darkness: the shadow is the object's own color, each channel times 1 − darkness in an RGB
+/// Darkness: the shadow is the object's own color, with darkness subtracted from each RGB channel in an RGB
 /// document (the reference app's guide gives the object's color at 0%,
 /// <https://help.adobe.com/archive/en/illustrator/cc/2014/illustrator_reference.pdf> page 428), in the cached
 /// raster and, at 6000 %, in the filter layer that a raster too large to cache is drawn with.
@@ -298,9 +298,8 @@ fn drop_shadow_darkness_darkens_the_objects_own_color() {
     }
 }
 
-/// In a CMYK document Darkness adds black ink and keeps the object's cyan, magenta and yellow
-/// (same page of the guide: at 100% an object with colors other than black gets a shadow of those colors under
-/// full black, and a black object's shadow is 100% black).
+/// Intermediate Darkness adds black ink while preserving C/M/Y. The top endpoint becomes
+/// gray black before ink conversion; its output below uses this application's gray-color model.
 #[test]
 fn drop_shadow_darkness_adds_black_in_a_cmyk_document() {
     let cmyk = vectorcraft_doc::ColorMode::Cmyk;
@@ -312,13 +311,29 @@ fn drop_shadow_darkness_adds_black_in_a_cmyk_document() {
     let red = Color::cmyk(0.0, 1.0, 1.0, 0.0);
     for (darkness, k) in [(0.0, 0), (50.0, 128), (100.0, 255)] {
         let got = inks(&shaded_doc(cmyk, red, "darkness", darkness));
-        assert!(got[0] == 0 && got[1] == 255 && got[2] == 255 && got[3].abs_diff(k) <= 1, "{darkness}%: {got:?}");
+        let my = if darkness == 100.0 { 0 } else { 255 };
+        assert!(got[0] == 0 && got[1] == my && got[2] == my && got[3].abs_diff(k) <= 1, "{darkness}%: {got:?}");
     }
-    // Half black ink, darkened by half: K 50 + 50 × 50% = K 75.
+    // Half black ink plus 50 percentage points clamps at full black.
     let got = inks(&shaded_doc(cmyk, Color::cmyk(0.0, 0.0, 0.0, 0.5), "darkness", 50.0));
-    assert!(got[..3] == [0, 0, 0] && got[3].abs_diff(191) <= 1, "{got:?}");
+    assert!(got[..3] == [0, 0, 0] && got[3].abs_diff(255) <= 1, "{got:?}");
     let got = inks(&shaded_doc(cmyk, Color::cmyk(0.0, 0.0, 0.0, 1.0), "darkness", 100.0));
     assert_eq!(got, [0, 0, 0, 255]);
+}
+
+/// The top endpoint is gray black before document/profile conversion, independently of source model.
+#[test]
+fn darkness_black_endpoint_and_gray_source_follow_their_stored_models() {
+    for mode in [vectorcraft_doc::ColorMode::Rgb, vectorcraft_doc::ColorMode::Cmyk] {
+        for source in [Color::rgb(0.8, 0.4, 0.2), Color::cmyk(0.1, 0.3, 0.4, 0.2), Color::gray(0.2)] {
+            let got = render(&shaded_doc(mode, source, "darkness", 100.0)).pixel(66, 66);
+            let want = render(&shaded_doc(mode, Color::gray(1.0), "darkness", 0.0)).pixel(66, 66);
+            assert_eq!(got, want, "{mode:?}, {source:?}");
+        }
+        let got = render(&shaded_doc(mode, Color::gray(0.2), "darkness", 25.0)).pixel(66, 66);
+        let want = render(&shaded_doc(mode, Color::gray(0.45), "darkness", 0.0)).pixel(66, 66);
+        assert_eq!(got, want, "gray intermediate in {mode:?}");
+    }
 }
 
 /// Color stays the default: a shadow without the new keys, and one with Color chosen and a

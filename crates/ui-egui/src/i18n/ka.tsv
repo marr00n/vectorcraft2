@@ -142,6 +142,7 @@
 	Other Layers	სხვა შრეები
 	Unlock All	ყველაფრის განბლოკვა
 	Hide	დამალვა
+	Unselected Artwork	მოუნიშნავი ნახატი
 	Show All	ყველას ჩვენება
 	Expand…	გაშლა…
 	Expand Appearance	იერსახის გაშლა
@@ -698,6 +699,10 @@
 	Shaper	ფორმირება
 	Expand Shaper Group	ფორმირების ჯგუფის გაშლა
 	Release Shaper Group	ფორმირების ჯგუფის მოხსნა
+	Remove from Shaper Group	ფორმირების ჯგუფიდან ამოღება
+@msg	source must be the id of a Shaper Group's original shape	source უნდა იყოს ფორმირების ჯგუფის საწყისი ფიგურის იდენტიფიკატორი
+@msg	group must be the id of a Shaper Group	group უნდა იყოს ფორმირების ჯგუფის იდენტიფიკატორი
+@msg	the shape is not an editable original shape of that Shaper Group	ფიგურა არ არის ამ ფორმირების ჯგუფის რედაქტირებადი საწყისი ფიგურა
 	Select Shaper Face	ფორმირების არის მონიშვნა
 	Constrain	შეზღუდვა
 	Free Transform	თავისუფალი გარდაქმნა
@@ -3889,6 +3894,7 @@ font-technology	Variable	ცვლადი
 @msg	no current layer	მიმდინარე შრე არ არის
 @msg	no data	მონაცემები არ არის
 @msg	no dialog open	დიალოგი გახსნილი არ არის
+@msg	the open dialog has no Reset	გახსნილ დიალოგში ღილაკი ჩამოყრა არ არის
 @msg	no document	დოკუმენტი არ არის
 @msg	no document open	გახსნილი დოკუმენტი არ არის
 @msg	no effect applied yet	ეფექტი ჯერ არ გამოყენებულა

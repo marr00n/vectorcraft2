@@ -3750,6 +3750,7 @@ theme	Appearance	Εμφάνιση
 	Unlock Guides	Ξεκλείδωμα οδηγών
 	Unnamed Objects	Αντικείμενα χωρίς όνομα
 	Unprintable margin:	Μη εκτυπώσιμο περιθώριο:
+	Unselected Artwork	Μη επιλεγμένα γραφικά στοιχεία
 	Unshift	Αναίρεση μετατόπισης
 	Update Link	Ενημέρωση συνδέσμου
 	Update Links	Ενημέρωση συνδέσμων
@@ -4075,6 +4076,7 @@ theme	Appearance	Εμφάνιση
 @msg	no current layer	δεν υπάρχει τρέχον επίπεδο
 @msg	no data	δεν υπάρχουν δεδομένα
 @msg	no dialog open	δεν υπάρχει ανοιχτό παράθυρο διαλόγου
+@msg	the open dialog has no Reset	το ανοιχτό παράθυρο διαλόγου δεν έχει κουμπί Επαναφορά
 @msg	no document	δεν υπάρχει έγγραφο
 @msg	no document open	δεν υπάρχει ανοιχτό έγγραφο
 @msg	no effect applied yet	δεν έχει εφαρμοστεί ακόμη εφέ
@@ -4470,6 +4472,10 @@ theme	Appearance	Εμφάνιση
 	Shaper	Διαμορφωτής σχημάτων (Shaper Tool)
 	Expand Shaper Group	Ανάπτυξη ομάδας διαμόρφωσης σχημάτων
 	Release Shaper Group	Αποδέσμευση ομάδας διαμόρφωσης σχημάτων
+	Remove from Shaper Group	Αφαίρεση από ομάδα διαμόρφωσης σχημάτων
+@msg	source must be the id of a Shaper Group's original shape	Το source πρέπει να είναι το αναγνωριστικό ενός αρχικού σχήματος ομάδας διαμόρφωσης σχημάτων
+@msg	group must be the id of a Shaper Group	Το group πρέπει να είναι το αναγνωριστικό μιας ομάδας διαμόρφωσης σχημάτων
+@msg	the shape is not an editable original shape of that Shaper Group	Το σχήμα δεν είναι επεξεργάσιμο αρχικό σχήμα αυτής της ομάδας διαμόρφωσης σχημάτων
 	Select Shaper Face	Επιλογή επιφάνειας διαμορφωτή
 	Drag art, colors and text styles here to reuse them across documents. Libraries are stored on this machine — no account required.	Σύρετε εδώ σχέδια, χρώματα και στυλ κειμένου για χρήση σε άλλα έγγραφα. Οι βιβλιοθήκες αποθηκεύονται στον υπολογιστή — χωρίς λογαριασμό.
 	1 Color Job	Εργασία ενός χρώματος

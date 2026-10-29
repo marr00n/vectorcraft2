@@ -3332,6 +3332,7 @@ font-script	Japanese	汉字
 	Unlock Guides	解锁参考线
 	Unnamed Objects	未命名对象
 	Unprintable margin:	不可打印边界：
+	Unselected Artwork	未选择的图稿
 	Unshift	取消偏移
 	Untitled	未命名
 	Update Link	更新链接
@@ -4277,6 +4278,7 @@ imageTrace	Outline	轮廓
 @msg	can't parse shortcut `{c}`	无法解析快捷键 `{c}`
 @msg	can't parse shortcut `{s}` for `{k}`	无法解析 `{k}` 的快捷键 `{s}`
 @msg	no dialog open	没有打开的对话框
+@msg	the open dialog has no Reset	打开的对话框没有重置按钮
 @msg	no file reader	没有文件读取器
 @msg	no file writer	没有文件写入器
 @msg	not a VectorCraft shortcut set (missing `overrides`)	不是 VectorCraft 快捷键组 (缺少 `overrides`)
@@ -4829,6 +4831,10 @@ axis	Both	两者
 	The dialog was closed before its file dialog answered	文件对话框给出结果之前，对话框已关闭
 	Expand Shaper Group	扩展 Shaper 组
 	Release Shaper Group	释放 Shaper 组
+	Remove from Shaper Group	从 Shaper 组中移除
+@msg	source must be the id of a Shaper Group's original shape	source 必须是 Shaper 组中原始形状的 ID
+@msg	group must be the id of a Shaper Group	group 必须是 Shaper 组的 ID
+@msg	the shape is not an editable original shape of that Shaper Group	该形状不是该 Shaper 组中可编辑的原始形状
 	Select Shaper Face	选择 Shaper 区域
 	Constrain	约束
 	Perspective Distort	透视扭曲

@@ -192,6 +192,7 @@ font-technology	Variable	가변
 	Other Layers	다른 레이어
 	Unlock All	모두 잠금 해제
 	Hide	숨기기
+	Unselected Artwork	선택되지 않은 아트워크
 	Show All	모두 표시
 	Expand…	확장…
 	Expand Appearance	모양새 확장
@@ -3777,6 +3778,10 @@ theme	Appearance	외관
 	Shaper	셰이퍼
 	Expand Shaper Group	셰이퍼 그룹 확장
 	Release Shaper Group	셰이퍼 그룹 해제
+	Remove from Shaper Group	셰이퍼 그룹에서 제거
+@msg	source must be the id of a Shaper Group's original shape	source는 셰이퍼 그룹의 원본 모양 ID여야 합니다
+@msg	group must be the id of a Shaper Group	group은 셰이퍼 그룹의 ID여야 합니다
+@msg	the shape is not an editable original shape of that Shaper Group	모양이 해당 셰이퍼 그룹의 편집 가능한 원본 모양이 아닙니다
 	Select Shaper Face	셰이퍼 면 선택
 	Constrain	제한
 	Free Transform	자유 변형
@@ -4483,6 +4488,7 @@ theme	Appearance	외관
 @msg	can't parse shortcut `{c}`	단축키 `{c}`을(를) 해석할 수 없습니다
 @msg	can't parse shortcut `{s}` for `{k}`	`{k}`의 단축키 `{s}`을(를) 해석할 수 없습니다
 @msg	no dialog open	열린 대화상자가 없습니다
+@msg	the open dialog has no Reset	열린 대화상자에 재설정 단추가 없습니다
 @msg	no file reader	파일 판독기가 없습니다
 @msg	no file writer	파일 기록기가 없습니다
 @msg	not a VectorCraft shortcut set (missing `overrides`)	VectorCraft 단축키 세트가 아닙니다(`overrides`가 없음)

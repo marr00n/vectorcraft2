@@ -94,11 +94,11 @@ impl Renderer {
         let whole = fits && k >= 1.0;
         let in_view = (!whole).then(|| ViewCrop::of(f.view, room));
         let stamp = self.stamp;
-        let channels = match f.ink {
+        let channels = match f.ink.base() {
             Ink::Cmy => effects::pixel::Channels::CmyPlane,
             Ink::K => effects::pixel::Channels::KPlane,
             Ink::Display | Ink::RichBlack if f.doc.color_mode == vectorcraft_doc::ColorMode::Cmyk => effects::pixel::Channels::Cmyk,
-            Ink::Display | Ink::RichBlack => effects::pixel::Channels::Rgb,
+            _ => effects::pixel::Channels::Rgb,
         };
         // De-Interlace's field lines: the rows of the document's raster grid (1 to 2400 ppi).
         let ppi = doc_raster_ppi(f.doc);

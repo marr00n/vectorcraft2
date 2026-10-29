@@ -3464,6 +3464,7 @@ font-technology	Variable	Variables
 	Unlock Guides	Desbloquear guías
 	Unnamed Objects	Objetos sin nombre
 	Unprintable margin:	Margen no imprimible:
+	Unselected Artwork	Ilustración no seleccionada
 	Unshift	Deshacer cambio
 	Untitled	Sin título
 	Update Link	Actualizar vínculo
@@ -4112,6 +4113,7 @@ axis	Both	Ambos
 @msg	no current layer	no hay capa actual
 @msg	no data	no hay datos
 @msg	no dialog open	no hay ningún cuadro de diálogo abierto
+@msg	the open dialog has no Reset	el cuadro de diálogo abierto no tiene el botón Restablecer
 @msg	no document	no hay documento
 @msg	no document open	no hay ningún documento abierto
 @msg	no effect applied yet	todavía no se aplicó ningún efecto
@@ -4518,6 +4520,10 @@ axis	Both	Ambos
 	Shaper	Shaper
 	Expand Shaper Group	Expandir grupo Shaper
 	Release Shaper Group	Soltar grupo Shaper
+	Remove from Shaper Group	Quitar del grupo Shaper
+@msg	source must be the id of a Shaper Group's original shape	source debe ser el identificador de una forma original de un grupo Shaper
+@msg	group must be the id of a Shaper Group	group debe ser el identificador de un grupo Shaper
+@msg	the shape is not an editable original shape of that Shaper Group	la forma no es una forma original editable de ese grupo Shaper
 	Select Shaper Face	Seleccionar cara Shaper
 	Constrain	Restringir
 	Free Transform	Transformación libre

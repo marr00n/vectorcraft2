@@ -3414,6 +3414,7 @@ effect	Points	Punkte
 	Unlock Guides	Hilfslinien entsperren
 	Unnamed Objects	Unbenannte Objekte
 	Unprintable margin:	Nicht druckbarer Rand:
+	Unselected Artwork	Nicht ausgewählte Grafik
 	Unshift	Verschiebung aufheben
 	Untitled	Unbenannt
 	Update Link	Verknüpfung aktualisieren
@@ -4033,6 +4034,7 @@ theme	Appearance	Erscheinungsbild
 @msg	no current layer	keine aktuelle Ebene
 @msg	no data	keine Daten
 @msg	no dialog open	kein Dialogfeld geöffnet
+@msg	the open dialog has no Reset	das geöffnete Dialogfeld hat keine Schaltfläche „Zurücksetzen“
 @msg	no document	kein Dokument
 @msg	no document open	kein Dokument geöffnet
 @msg	no effect applied yet	noch kein Effekt angewendet
@@ -4438,6 +4440,10 @@ theme	Appearance	Erscheinungsbild
 	Shaper	Shaper
 	Expand Shaper Group	Shaper-Gruppe umwandeln
 	Release Shaper Group	Shaper-Gruppe zurückwandeln
+	Remove from Shaper Group	Aus Shaper-Gruppe entfernen
+@msg	source must be the id of a Shaper Group's original shape	source muss die ID einer Originalform einer Shaper-Gruppe sein
+@msg	group must be the id of a Shaper Group	group muss die ID einer Shaper-Gruppe sein
+@msg	the shape is not an editable original shape of that Shaper Group	die Form ist keine bearbeitbare Originalform dieser Shaper-Gruppe
 	Select Shaper Face	Shaper-Teilfläche auswählen
 	Drag art, colors and text styles here to reuse them across documents. Libraries are stored on this machine — no account required.	Ziehen Sie Grafiken, Farben und Textformate hierher, um sie in mehreren Dokumenten wiederzuverwenden. Bibliotheken werden auf diesem Computer gespeichert – kein Konto erforderlich.
 	1 Color Job	1-Farben-Auftrag
