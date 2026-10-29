@@ -589,12 +589,16 @@ come back without a path), `file.newFromTemplate {path}`, `file.revert` and `fil
 with the values a save would use). Without a path the save commands return `{dataBase64, name, folder?, warnings}`. A document saved as SVG or PDF
 remembers its options, so the next save reuses them. A PDF opened with `pages`, `cropTo` or `password` is only part
 of the file, so Save asks for a new name instead of writing it back.
-`file.documentColorMode {mode, convert?, intent?, grays?}` switches the document colour mode, converting the colours of
-the art, symbols, pattern tiles and swatches through the colour settings (`object.convertDocumentColorMode` is an
-alias kept for older scripts). Gray colours stay Gray and print on the black plate only. RGB greys are colours like any
+`file.documentColorMode {mode, convert?, intent?, grays?}` switches the document color mode, converting the colors of
+the art (opacity masks included), symbols, graph designs, pattern tiles (with the tile that pattern editing's Cancel
+puts back), graphic styles, brushes (their art and a Hue Shift key color) and swatches through the color settings, in
+one undo step (`object.convertDocumentColorMode` is an alias kept for older scripts). Gray colors stay Gray and print
+on the black plate only. RGB grays are colors like any
 other: to CMYK they separate through the profile into four-colour greys and a rich black, as Illustrator converts
 them. `grays: "black"` puts RGB greys with R = G = B on the black plate instead, K = their grey value (the inks Edit Colors ›
-Convert to Grayscale before the switch would give); other colours convert as usual.
+Convert to Grayscale before the switch would give); other colors convert as usual. The reply's `changed` counts the
+colors that changed in the art, symbols, graph designs and pattern tiles; it does not count the colors of graphic
+styles and brushes.
 
 SVG import keeps what the canvas edits live. `<pattern>` becomes a pattern swatch. A `<symbol>` with `<use>` becomes a
 symbol (named after its `data-name`, else its id) with an instance per `<use>`; a `<use>` that shows it differently
@@ -1570,7 +1574,14 @@ already walks Image Trace. Short agent entry points:
   highlight color, `#rrggbb` or a layer color's name; `#ff2a2a`) and `width` (the highlight's width, 1 to 20 screen
   pixels; 4). With `selectStrokes` off, Alt-click selects the face under the pointer as a click does; with
   `selectFills` off, a click selects the edge nearest the pointer as Alt-click does; with both off, a click selects
-  no face or edge.
+  no face or edge. A drag of 3 screen pixels or more draws a marquee, and the release runs `select.set {ids}` with
+  the faces and edges it touches (a face or edge partly inside counts, and so does a face that holds the whole
+  marquee), or `select.none` when it touches none. With Shift held at the press, the release runs
+  `select.toggle {ids}` with the faces and edges it touches, each of which leaves the selection or joins it, and runs
+  nothing when it touches none. `selectFills` off leaves the faces out, and `selectStrokes` off leaves the edges out. A click and a marquee run their command on the
+  release, and Escape between the press and the release removes the marquee so that the release runs nothing. The
+  tool does not highlight or select the faces and edges of a Live Paint group that is locked, on a locked layer or on
+  a locked artboard, or in isolation mode outside the isolated art.
   `livePaint.merge` keeps the bottom Live Paint group's id, name, lock, visibility, transparency, appearance, opacity
   mask and graphic style link. With a Live Paint group among the objects, `livePaint.make` adds the others to it as
   `livePaint.merge` does, and so does `livePaint.fill {ids}` when `point` is outside that group's faces.
@@ -2557,6 +2568,23 @@ dialog `simplifySlider` with field `level`) at the Auto-Simplify level for the s
 `ui.dialog.confirm`. `ui.simplifyAuto` moves the open slider back to the Auto-Simplify level, and `ui.simplifyMoreOptions`
 opens the Simplify dialog at the slider's tolerance. When OK confirms the dialog with `retain` ticked, the menu item opens
 the dialog on those settings next time.
+
+## Smooth
+
+`object.path.smooth` smooths the selected paths (or the objects in `ids`), compound path members included, as one undo
+step. `level` is the Smooth slider's, a whole number from 0 (minimum smoothing: the path stays within 0.1% of its longer
+side) to 100 (maximum smoothing); `auto: true` (Auto-Smooth) uses level 50, the default. Each path is refitted with
+curves within 0.1% to 2.5% of its longer side, keeping a corner only where it turns back on itself, so jags and kinks
+become curves; a refit never has more anchor points than the path had, so a shape whose corners the tolerance can't
+round, such as a rectangle, stays as it is. Closed paths stay closed and open paths keep their end points. The reply has the anchor counts `before` and `after` and the `level` used:
+
+```json
+{"name":"run_command","arguments":{"command":"object.path.smooth","params":{"level":80}}}
+```
+
+In the desktop app, Object › Path › Smooth opens the slider (`ui.menuDialog {command: "object.path.smooth"}`, dialog
+`smoothSlider` with field `level`) at the Auto-Smooth level and previews the result until `ui.dialog.confirm`;
+`ui.smoothAuto` moves the open slider back to the Auto-Smooth level.
 
 ## Editing a path with the Curvature tool
 

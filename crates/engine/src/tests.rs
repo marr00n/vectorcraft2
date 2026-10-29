@@ -140,6 +140,7 @@ mod shortcutset;
 mod simplify_part;
 mod slices;
 mod smartguides;
+mod smooth_path;
 mod store;
 mod strokegeom;
 mod strokegradient;

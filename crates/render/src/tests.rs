@@ -306,7 +306,10 @@ fn past_the_measured_placements_an_instance_is_culled_by_an_estimate_of_its_art_
 /// Symbols 0 to 29 each hold two instances of the next, sheared two ways, so that the 2^30
 /// instances drawn from the first are all placed differently. Symbol 30 holds a square with a drop
 /// shadow. An instance of symbol 0 lies far left of the view. With `effect`, every instance has
-/// that effect of its own. The renderer must cull the instance of symbol 0 within 30 s.
+/// that effect of its own. The renderer must cull the instance of symbol 0 measuring symbol art at
+/// most 20,000 times ([`FrameStats::symbol_art`]); measuring the art for every placement would take
+/// 2^30 measurements or more. The frame runs on a thread of its own, and the test fails when it
+/// has not finished after 300 s.
 fn nested_instances_are_culled_in_bounded_time(effect: Option<vectorcraft_doc::Effect>) {
     let mut d = Document::new(100.0, 100.0);
     let mut art = rect_node(&mut d, Rect::new(0.0, 0.0, 1.0, 1.0), Paint::solid(Color::BLACK), Paint::None, 0.0);
@@ -334,11 +337,13 @@ fn nested_instances_are_culled_in_bounded_time(effect: Option<vectorcraft_doc::E
     std::thread::spawn(move || {
         let mut r = Renderer::new();
         let img = r.render(&d, 100, 100, Affine::IDENTITY, &RenderOptions::default());
-        tx.send((img.pixel(50, 50), r.stats.culled)).ok();
+        tx.send((img.pixel(50, 50), r.stats.culled, r.stats.symbol_art)).ok();
     });
-    let (pixel, culled) = rx.recv_timeout(std::time::Duration::from_secs(30)).expect("the frame within 30 s");
+    let (pixel, culled, measured) = rx.recv_timeout(std::time::Duration::from_secs(300)).expect("the frame within 300 s");
     assert_eq!(pixel, [0, 0, 0, 0]);
     assert!(culled > 0);
+    assert!(measured > 0, "the frame stats report no symbol art measures");
+    assert!(measured <= 20_000, "symbol art measured {measured} times");
 }
 
 #[test]

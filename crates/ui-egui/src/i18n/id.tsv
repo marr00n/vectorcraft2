@@ -208,6 +208,7 @@
 	Offset Path…	Jalur ofset…
 	Reverse Path Direction	Balikkan arah jalur
 	Simplify…	Sederhanakan…
+	Smooth…	Haluskan…
 	Add Anchor Points	Tambahkan titik jangkar
 	Remove Anchor Points	Hapus titik jangkar
 	Divide Objects Below	Bagi objek di bawah
@@ -4091,6 +4092,7 @@ imageTrace	Outline	Kontur
 @msg	missing `id` (see plugin.list)	`id` tidak ada (lihat plugin.list)
 @msg	missing `name`	`name` tidak ada
 @msg	missing `tool`	`tool` tidak ada
+@msg	missing id	id tidak ada
 @msg	missing index	indeks tidak ada
 @msg	missing number `{key}`	angka `{key}` tidak ada
 @msg	missing integer `{key}`	bilangan bulat `{key}` tidak ada
@@ -4314,6 +4316,9 @@ imageTrace	Outline	Kontur
 @msg	the layer or group is locked	lapisan atau grup terkunci
 @msg	the guide is on a hidden or locked layer	panduan berada di lapisan yang tersembunyi atau terkunci
 @msg	the target layer is locked or hidden	lapisan target terkunci atau tersembunyi
+@msg	the object is hidden or locked	objek tersembunyi atau terkunci
+@msg	the object is outside the isolated group	objek berada di luar grup yang diisolasi
+@msg	type objects can't be isolated	objek teks tidak dapat diisolasi
 @msg	the layer to flatten into is hidden	lapisan tujuan perataan tersembunyi
 @msg	the object already has an opacity mask	objek sudah memiliki masker opasitas
 @msg	the object has no geometry	objek tidak memiliki geometri
@@ -5192,6 +5197,7 @@ swatch	Bright Violet	Violet cerah
 	Show Original Path	Tampilkan jalur asli
 	Open this dialog with these settings next time	Buka dialog ini dengan pengaturan ini lain kali
 	Auto-Simplify	Sederhanakan otomatis
+	Auto-Smooth	Haluskan otomatis
 @msg	check a layer to export	centang lapisan yang akan diekspor
 @msg	select the art to export first	pilih dulu karya yang akan diekspor
 @msg	no saved selection recalled	tidak ada seleksi tersimpan yang dipanggil

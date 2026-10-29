@@ -47,6 +47,151 @@ fn document_color_mode_converts_grouped_swatches() {
     assert!(matches!(doc(&s).swatch("Bright Red").unwrap().paint.color(), Some(Color::Cmyk { .. })));
 }
 
+/// The first solid fill color in the subtree of `n`.
+fn first_fill(n: &vectorcraft_doc::Node) -> Color {
+    let mut out = None;
+    n.walk(&mut |m| {
+        if out.is_none() {
+            out = m.appearance.fill_paint().color();
+        }
+    });
+    out.unwrap_or_else(|| panic!("no fill in {n:?}"))
+}
+
+/// The fill of graph design "Bar", the fill of brush "Holder"'s art and its Hue Shift key color,
+/// the fill of graphic style "Red" and the fill of the art of `masked`'s opacity mask.
+fn colors_outside_the_layers(s: &Session, masked: NodeId) -> Vec<Color> {
+    let d = doc(s);
+    let brush = vectorcraft_brush::find(d, "Holder").unwrap();
+    let vectorcraft_brush::Colorization::HueShift { key } = brush.kind.colorization() else { panic!("not Hue Shift") };
+    vec![
+        first_fill(&d.graph_designs.iter().find(|g| g.name == "Bar").unwrap().art),
+        first_fill(brush.art()[0]),
+        key,
+        d.graphic_style("Red").unwrap().appearance.fill_paint().color().unwrap(),
+        first_fill(&d.node(masked).unwrap().extras().mask.as_deref().unwrap().art),
+    ]
+}
+
+/// Document Color Mode converts the colors of graph designs, of the art of brushes (with a Hue
+/// Shift brush's key color), of graphic styles and of opacity-mask art as it converts the
+/// layers' art, tints of global swatches included, in one undo step.
+#[test]
+fn document_color_mode_converts_art_outside_the_layers() {
+    let mut s = session();
+    run(&mut s, "swatch.new", json!({"name": "Tone", "color": "#ff0000", "global": true}));
+    let hue_shift = json!({"colorization": {"method": "hueShift"}});
+    for (cmd, p, paint) in [
+        ("graph.design", json!({"new": "Bar"}), json!({"swatch": "Tone", "tint": 40})),
+        ("brush.new", json!({"type": "art", "name": "Holder", "params": hue_shift}), json!({"color": "#ff0000"})),
+        ("graphicStyle.new", json!({"name": "Red"}), json!({"color": "#ff0000"})),
+    ] {
+        let id = rect(&mut s);
+        let mut paint = paint;
+        paint["ids"] = json!([id.0]);
+        run(&mut s, "paint.setFill", paint);
+        run(&mut s, "paint.setStroke", json!({"none": true, "ids": [id.0]}));
+        run(&mut s, "select.set", json!({"ids": [id.0]}));
+        run(&mut s, cmd, p);
+        run(&mut s, "edit.clear", json!({"ids": [id.0]}));
+    }
+    let masked = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"color": "#ff0000", "ids": [masked.0]}));
+    let m = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"color": "#808080", "ids": [m.0]}));
+    run(&mut s, "select.set", json!({"ids": [masked.0, m.0]}));
+    run(&mut s, "transparency.makeOpacityMask", json!({"clip": true, "invert": false}));
+    let before = colors_outside_the_layers(&s, masked);
+    assert!(before.iter().all(|c| matches!(c, Color::Rgb { .. })), "{before:?}");
+    let undo = s.doc().unwrap().history.undo.len();
+
+    run(&mut s, "file.documentColorMode", json!({"mode": "cmyk"}));
+    let after = colors_outside_the_layers(&s, masked);
+    assert!(after.iter().all(|c| matches!(c, Color::Cmyk { .. })), "{after:?}");
+    // The same red converts to the same inks wherever it is.
+    let red = first_fill(doc(&s).node(masked).unwrap());
+    assert_eq!(after[1..4], [red; 3]);
+    // A tint of a global swatch is the converted swatch's color at that tint.
+    let tone = doc(&s).swatch("Tone").unwrap().paint.color().unwrap();
+    assert_eq!(after[0], tone.tinted(0.4));
+    assert_eq!(s.doc().unwrap().history.undo.len(), undo + 1);
+    run(&mut s, "edit.undo", json!({}));
+    assert_eq!(colors_outside_the_layers(&s, masked), before);
+}
+
+/// A Hue Shift brush whose art is painted with a tint of a global swatch keeps its key color equal
+/// to that art color after Document Color Mode.
+#[test]
+fn document_color_mode_keeps_a_hue_shift_key_on_its_tinted_art() {
+    let mut s = session();
+    run(&mut s, "swatch.new", json!({"name": "Tone", "color": "#ff0000", "global": true}));
+    let id = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"swatch": "Tone", "tint": 40, "ids": [id.0]}));
+    run(&mut s, "paint.setStroke", json!({"none": true, "ids": [id.0]}));
+    run(&mut s, "select.set", json!({"ids": [id.0]}));
+    run(&mut s, "brush.new", json!({"type": "art", "name": "Holder", "params": {"colorization": {"method": "hueShift"}}}));
+    run(&mut s, "edit.clear", json!({"ids": [id.0]}));
+    let key_and_art = |s: &Session| {
+        let brush = vectorcraft_brush::find(doc(s), "Holder").unwrap();
+        let vectorcraft_brush::Colorization::HueShift { key } = brush.kind.colorization() else { panic!("not Hue Shift") };
+        (key, first_fill(brush.art()[0]))
+    };
+    let (key, art) = key_and_art(&s);
+    assert_eq!(key, art);
+    run(&mut s, "file.documentColorMode", json!({"mode": "cmyk"}));
+    let (key, art) = key_and_art(&s);
+    assert!(matches!(art, Color::Cmyk { .. }), "{art:?}");
+    assert_eq!(key, art);
+}
+
+/// The reply's `changed` counts the colors of the document's art; the colors of brush art and
+/// graphic styles convert without being counted.
+#[test]
+fn document_color_mode_counts_the_colors_of_the_art_only() {
+    let changed = |library: bool| {
+        let mut s = session();
+        if library {
+            for (cmd, p) in [("brush.new", json!({"type": "art", "name": "Holder"})), ("graphicStyle.new", json!({"name": "Red"}))] {
+                let id = rect(&mut s);
+                run(&mut s, "paint.setFill", json!({"color": "#ff0000", "ids": [id.0]}));
+                run(&mut s, "select.set", json!({"ids": [id.0]}));
+                run(&mut s, cmd, p);
+                run(&mut s, "edit.clear", json!({"ids": [id.0]}));
+            }
+        }
+        let id = rect(&mut s);
+        run(&mut s, "paint.setFill", json!({"color": "#ff0000", "ids": [id.0]}));
+        let r = run(&mut s, "file.documentColorMode", json!({"mode": "cmyk"}));
+        if library {
+            let brush = vectorcraft_brush::find(doc(&s), "Holder").unwrap();
+            assert!(matches!(first_fill(brush.art()[0]), Color::Cmyk { .. }));
+        }
+        r["changed"].as_u64().unwrap()
+    };
+    let in_art = changed(false);
+    assert!(in_art > 0);
+    assert_eq!(changed(true), in_art);
+}
+
+/// Document Color Mode chosen while a pattern is being edited also converts the tile that pattern
+/// editing's Cancel puts back.
+#[test]
+fn document_color_mode_converts_the_tile_that_pattern_cancel_puts_back() {
+    let mut s = session();
+    let id = rect(&mut s);
+    run(&mut s, "paint.setFill", json!({"color": "#ff0000", "ids": [id.0]}));
+    run(&mut s, "paint.setStroke", json!({"none": true, "ids": [id.0]}));
+    run(&mut s, "select.set", json!({"ids": [id.0]}));
+    let pattern = run(&mut s, "object.pattern.make", json!({"edit": false}))["name"].as_str().unwrap().to_string();
+    run(&mut s, "object.pattern.edit", json!({"name": pattern}));
+    run(&mut s, "file.documentColorMode", json!({"mode": "cmyk"}));
+    run(&mut s, "object.pattern.cancel", json!({}));
+    let red = first_fill(doc(&s).node(id).unwrap());
+    assert!(matches!(red, Color::Cmyk { .. }), "{red:?}");
+    let tile: Vec<Color> = doc(&s).pattern(&pattern).unwrap().art.iter().map(|n| first_fill(n)).collect();
+    assert_eq!(tile, [red]);
+}
+
 #[test]
 fn grouped_spot_swatches_print_on_their_own_plate() {
     let mut s = session();

@@ -3042,6 +3042,7 @@ mark-style	Japanese	Японський
 	Show Original Path	Показати початковий контур
 	Open this dialog with these settings next time	Наступного разу відкривати це діалогове вікно з цими параметрами
 	Auto-Simplify	Автоматичне спрощення
+	Auto-Smooth	Автоматичне згладжування
 	Color Panel Options	Параметри панелі «Колір»
 	Show Package	Показати пакет
 	Show Panel	Показати панель
@@ -3078,6 +3079,7 @@ mark-style	Japanese	Японський
 	Simplify	Спростити
 	Simplify:	Спростити:
 	Simplify…	Спростити…
+	Smooth…	Згладити…
 	Simulate Colored Paper	Імітувати кольоровий папір
 	Simulate Paper	Імітувати папір
 	Double Column	Подвійний стовпець
@@ -4028,6 +4030,7 @@ axis	Both	Обидві
 @msg	videoRulerPixelAspectRatio must be a number from 0.1 to 10	videoRulerPixelAspectRatio має бути числом від 0,1 до 10
 @msg	the Color Picker is not open	палітра кольорів не відкрита
 @msg	the Simplify slider is not open	повзунок «Спростити» не відкрито
+@msg	the Smooth slider is not open	повзунок «Згладити» не відкрито
 @msg	the screen color sampler is already open	засіб вибору кольору з екрана вже відкритий
 @msg	this system has no screen color sampler	у цій системі немає засобу вибору кольору з екрана
 @msg	bad colour `{hex}` (#rrggbb)	неприпустимий колір `{hex}` (#rrggbb)
@@ -4100,6 +4103,7 @@ axis	Both	Обидві
 @msg	missing `id` (see plugin.list)	відсутня `id` (див. plugin.list)
 @msg	missing `name`	відсутня `name`
 @msg	missing `tool`	відсутня `tool`
+@msg	missing id	відсутній id
 @msg	missing index	відсутня index
 @msg	missing number `{key}`	відсутнє число `{key}`
 @msg	missing integer `{key}`	відсутнє ціле число `{key}`
@@ -4341,6 +4345,9 @@ axis	Both	Обидві
 @msg	the layer or group is locked	шар чи група заблоковані
 @msg	the guide is on a hidden or locked layer	напрямна розташована на прихованому або заблокованому шарі
 @msg	the target layer is locked or hidden	цільовий шар заблокований або прихований
+@msg	the object is hidden or locked	об’єкт прихований або заблокований
+@msg	the object is outside the isolated group	об’єкт поза ізольованою групою
+@msg	type objects can't be isolated	текстові об’єкти не можна ізолювати
 @msg	the layer to flatten into is hidden	шар для об’єднання прихований
 @msg	the object already has an opacity mask	об’єкт вже має маску непрозорості.
 @msg	the object has no geometry	об’єкт не має геометрії

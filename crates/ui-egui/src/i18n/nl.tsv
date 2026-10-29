@@ -222,6 +222,7 @@
 	Offset Path…	Pad verschuiven…
 	Reverse Path Direction	Padrichting omkeren
 	Simplify…	Vereenvoudigen…
+	Smooth…	Gladmaken…
 	Add Anchor Points	Ankerpunten toevoegen
 	Remove Anchor Points	Ankerpunten verwijderen
 	Divide Objects Below	Objecten eronder verdelen
@@ -4105,6 +4106,7 @@ imageTrace	Outline	Contour
 @msg	missing `id` (see plugin.list)	`id` ontbreekt (zie plugin.list)
 @msg	missing `name`	`name` ontbreekt
 @msg	missing `tool`	`tool` ontbreekt
+@msg	missing id	id ontbreekt
 @msg	missing index	index ontbreekt
 @msg	New Window isn't available yet: a document opens in one window	Nieuw venster is nog niet beschikbaar: een document opent in één venster
 @msg	name the file	geef het bestand een naam
@@ -4326,6 +4328,9 @@ imageTrace	Outline	Contour
 @msg	the layer or group is locked	de laag of groep is vergrendeld
 @msg	the guide is on a hidden or locked layer	de hulplijn staat op een verborgen of vergrendelde laag
 @msg	the target layer is locked or hidden	de doellaag is vergrendeld of verborgen
+@msg	the object is hidden or locked	het object is verborgen of vergrendeld
+@msg	the object is outside the isolated group	het object ligt buiten de geïsoleerde groep
+@msg	type objects can't be isolated	tekstobjecten kunnen niet worden geïsoleerd
 @msg	the layer to flatten into is hidden	de laag om in af te vlakken is verborgen
 @msg	the object already has an opacity mask	het object heeft al een dekkingmasker
 @msg	the object has no geometry	het object heeft geen geometrie
@@ -5203,6 +5208,7 @@ swatch	Bright Violet	Felviolet
 	Show Original Path	Oorspronkelijk pad tonen
 	Open this dialog with these settings next time	Dit dialoogvenster de volgende keer met deze instellingen openen
 	Auto-Simplify	Automatisch vereenvoudigen
+	Auto-Smooth	Automatisch gladmaken
 @msg	check a layer to export	vink een laag aan om te exporteren
 @msg	select the art to export first	selecteer eerst de illustratie die je wilt exporteren
 @msg	no saved selection recalled	geen opgeslagen selectie opgeroepen

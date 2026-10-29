@@ -4,7 +4,7 @@ use vectorcraft_doc::{Appearance, Document, Effect, Node};
 use vectorcraft_geom::{Affine, Rect, shapes};
 
 use super::{DRAG_PIXEL_BUDGET, Drawn, PIXEL_BUDGET, drag_scale, filter_region, filter_region_within, pan_margin};
-use crate::tests_fontchange::fonts_steady;
+use crate::tests_fontchange::{fonts_steady, with_fonts_unchanged};
 use crate::{RenderOptions, Rendered, Renderer};
 
 /// #1706: the raster a shadow or glow is filtered in stays within the pixel budget however
@@ -758,17 +758,26 @@ fn a_moved_group_draws_the_shadow_of_the_instance_art_in_it_while_interacting() 
     let (view, still) = (Affine::scale(2.0), RenderOptions { background: Some([255, 255, 255, 255]), ..Default::default() });
     let live = RenderOptions { interacting: true, ..still.clone() };
     let fresh = |d: &Document| Renderer::new().render(d, 200, 200, view, &still);
-    let mut r = Renderer::new();
-    let first = r.render(&base, 200, 200, view, &still);
+    // Content that shows a symbol reads the fonts, so the frames come from a run in which the
+    // fonts stayed the same.
+    let moves = [(3.0, 0.0), (5.5, 2.0)];
+    let (first, frames) = with_fonts_unchanged(|| {
+        let mut r = Renderer::new();
+        let first = r.render(&base, 200, 200, view, &still);
+        let frames = moves.map(|(dx, dy)| {
+            let d = moved(dx, dy);
+            let frame = r.render(&d, 200, 200, view, &live).pixels;
+            (r.stats.moved, frame == fresh(&d).pixels)
+        });
+        (first, frames)
+    });
     assert!(first.pixels == fresh(&base).pixels);
     // The shadow, 4 pt right of the art's right edge at x 50, at (104, 70) in pixels.
     assert!(lum(first.pixel(104, 70)) < WHITE, "{:?}", first.pixel(104, 70));
     // Moves on whole pixels (2 a point): the moved shadow lies where a fresh renderer draws it.
-    for (dx, dy) in [(3.0, 0.0), (5.5, 2.0)] {
-        let d = moved(dx, dy);
-        let frame = r.render(&d, 200, 200, view, &live).pixels;
-        assert_eq!(r.stats.moved, 1, "the shadow moved by ({dx}, {dy})");
-        assert!(frame == fresh(&d).pixels, "moved by ({dx}, {dy})");
+    for ((dx, dy), (count, same)) in moves.into_iter().zip(frames) {
+        assert_eq!(count, 1, "the shadow moved by ({dx}, {dy})");
+        assert!(same, "moved by ({dx}, {dy})");
     }
 }
 
@@ -783,12 +792,15 @@ fn moved_rasters_need_the_same_content_and_effects() {
     let (view, still) = (Affine::scale(2.0), RenderOptions { background: Some([255, 255, 255, 255]), ..Default::default() });
     let live = RenderOptions { interacting: true, ..still.clone() };
     // `before` drawn, then `after` while interacting: the rasters drawn moved, and whether the
-    // frame is what a fresh renderer draws.
+    // frame is what a fresh renderer draws. Content painted with a pattern reads the fonts, so
+    // the counts come from a run in which the fonts stayed the same.
     let drag = |before: &Document, after: &Document| {
-        let mut r = Renderer::new();
-        let _ = r.render(before, 200, 200, view, &still);
-        let frame = r.render(after, 200, 200, view, &live).pixels;
-        (r.stats.moved, frame == Renderer::new().render(after, 200, 200, view, &still).pixels)
+        with_fonts_unchanged(|| {
+            let mut r = Renderer::new();
+            let _ = r.render(before, 200, 200, view, &still);
+            let frame = r.render(after, 200, 200, view, &live).pixels;
+            (r.stats.moved, frame == Renderer::new().render(after, 200, 200, view, &still).pixels)
+        })
     };
     // `d`'s object moved 5, 3 (10, 6 pixels), then changed by `edit`.
     let moved = |d: &Document, patterns: bool, edit: &dyn Fn(&mut Node)| {

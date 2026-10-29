@@ -199,7 +199,7 @@ impl DirectSelectionTool {
 
 /// Whether `id` may be picked while `scope` is isolated: it is that object, or it sits inside it.
 /// With no isolation, everything may be picked.
-fn in_scope(doc: &vectorcraft_doc::Document, scope: Option<NodeId>, id: NodeId) -> bool {
+pub(crate) fn in_scope(doc: &vectorcraft_doc::Document, scope: Option<NodeId>, id: NodeId) -> bool {
     scope.is_none_or(|scope| doc.ancestry(id).is_some_and(|anc| anc.contains(&scope)))
 }
 

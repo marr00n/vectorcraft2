@@ -2882,6 +2882,7 @@ font-script	Japanese	汉字
 	Show Original Path	显示原始路径
 	Open this dialog with these settings next time	下次以这些设置打开此对话框
 	Auto-Simplify	自动简化
+	Auto-Smooth	自动平滑
 	Color Panel Options	颜色面板选项
 	Show Package	显示打包
 	Show Panel	显示面板
@@ -2918,6 +2919,7 @@ font-script	Japanese	汉字
 	Simplify	简化
 	Simplify:	简化：
 	Simplify…	简化…
+	Smooth…	平滑…
 	Simulate Colored Paper	模拟有色纸张
 	Simulate Paper	模拟纸张
 	Double Column	双列
@@ -3816,6 +3818,9 @@ imageTrace	Outline	轮廓
 @msg	the layer or group is locked	该图层或编组已锁定
 @msg	the guide is on a hidden or locked layer	该参考线位于隐藏或锁定的图层上
 @msg	the target layer is locked or hidden	目标图层已锁定或隐藏
+@msg	the object is hidden or locked	该对象已隐藏或锁定
+@msg	the object is outside the isolated group	该对象在隔离的编组之外
+@msg	type objects can't be isolated	无法隔离文字对象
 @msg	the layer to flatten into is hidden	要拼合到的图层已隐藏
 @msg	there are no objects to release	没有可释放的对象
 @msg	no library `{id}`	没有库 `{id}`
@@ -4095,6 +4100,7 @@ imageTrace	Outline	轮廓
 @msg	videoRulerPixelAspectRatio must be a number from 0.1 to 10	videoRulerPixelAspectRatio 必须是 0.1 到 10 之间的数字
 @msg	the Color Picker is not open	拾色器未打开
 @msg	the Simplify slider is not open	简化滑块未打开
+@msg	the Smooth slider is not open	平滑滑块未打开
 @msg	the screen color sampler is already open	屏幕取色器已打开
 @msg	this system has no screen color sampler	此系统没有屏幕取色器
 @msg	Corners edits the corners of a path	转角用于编辑路径的转角
@@ -4208,6 +4214,7 @@ imageTrace	Outline	轮廓
 @msg	lang must be one of {_1}	lang 必须是 {_1} 之一
 @msg	missing `name`	缺少 `name`
 @msg	missing `tool`	缺少 `tool`
+@msg	missing id	缺少 id
 @msg	missing index	缺少 index
 @msg	New Window isn't available yet: a document opens in one window	新建窗口尚不可用：文档在一个窗口中打开
 @msg	no PNG encoder	没有 PNG 编码器

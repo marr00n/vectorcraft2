@@ -54,6 +54,7 @@ pub(super) fn menu_dialog(app: &VectorcraftApp, id: &str) -> Option<(&'static st
         // "Open this dialog with these settings next time" was ticked.
         "object.path.simplify" if app.ui.simplify.is_object() => ("simplify", app.ui.simplify.clone()),
         "object.path.simplify" => (crate::dialogs::simplify_slider::KIND, crate::dialogs::simplify_slider::fields(app)),
+        "object.path.smooth" => (crate::dialogs::smooth_slider::KIND, crate::dialogs::smooth_slider::fields()),
         "object.path.splitIntoGrid" => {
             // The grid starts at the size of the selection.
             let size =

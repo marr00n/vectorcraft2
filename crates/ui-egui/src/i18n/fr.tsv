@@ -3013,6 +3013,7 @@ font-technology	Variable	Variables
 	Show Original Path	Afficher le tracé d’origine
 	Open this dialog with these settings next time	Ouvrir cette boîte de dialogue avec ces réglages la prochaine fois
 	Auto-Simplify	Simplifier automatiquement
+	Auto-Smooth	Lisser automatiquement
 	Color Panel Options	Options du panneau Couleur
 	Show Package	Afficher le dossier d’assemblage
 	Show Panel	Afficher le panneau
@@ -3049,6 +3050,7 @@ font-technology	Variable	Variables
 	Simplify	Simplifier
 	Simplify:	Simplifier :
 	Simplify…	Simplifier…
+	Smooth…	Lisser…
 	Simulate Colored Paper	Simuler un papier de couleur
 	Simulate Paper	Simuler le papier
 	Double Column	Deux colonnes
@@ -4001,6 +4003,7 @@ axis	Both	Les deux
 @msg	videoRulerPixelAspectRatio must be a number from 0.1 to 10	videoRulerPixelAspectRatio doit être un nombre de 0,1 à 10
 @msg	the Color Picker is not open	le Sélecteur de couleurs n’est pas ouvert
 @msg	the Simplify slider is not open	le curseur Simplifier n’est pas ouvert
+@msg	the Smooth slider is not open	le curseur Lisser n’est pas ouvert
 @msg	the screen color sampler is already open	l’outil de prélèvement de couleur à l’écran est déjà ouvert
 @msg	this system has no screen color sampler	ce système n’a pas d’outil de prélèvement de couleur à l’écran
 @msg	bad colour `{hex}` (#rrggbb)	couleur non valide `{hex}` (#rrggbb)
@@ -4073,6 +4076,7 @@ axis	Both	Les deux
 @msg	missing `id` (see plugin.list)	`id` manquant (voir plugin.list)
 @msg	missing `name`	`name` manquant
 @msg	missing `tool`	`tool` manquant
+@msg	missing id	id manquant
 @msg	missing index	index manquant
 @msg	missing number `{key}`	nombre `{key}` manquant
 @msg	missing integer `{key}`	nombre entier `{key}` manquant
@@ -4314,6 +4318,9 @@ axis	Both	Les deux
 @msg	the layer or group is locked	le calque ou le groupe est verrouillé
 @msg	the guide is on a hidden or locked layer	le repère se trouve sur un calque masqué ou verrouillé
 @msg	the target layer is locked or hidden	le calque cible est verrouillé ou masqué
+@msg	the object is hidden or locked	l’objet est masqué ou verrouillé
+@msg	the object is outside the isolated group	l’objet est en dehors du groupe isolé
+@msg	type objects can't be isolated	les objets texte ne peuvent pas être isolés
 @msg	the layer to flatten into is hidden	le calque de destination de l’aplatissement est masqué
 @msg	the object already has an opacity mask	l’objet a déjà un masque d’opacité
 @msg	the object has no geometry	l’objet n’a pas de géométrie

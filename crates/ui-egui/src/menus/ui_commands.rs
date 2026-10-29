@@ -838,7 +838,7 @@ pub const UI_COMMANDS: &[(&str, &str, &str, &str)] = &[
         "ui.menuDialog",
         "Menu Dialog",
         "",
-        "{command: object.move|object.rotate|object.scale|object.reflect|object.shear|object.transformEach|path.average|object.path.offsetPath|object.path.simplify|object.path.splitIntoGrid|object.vectorHalftone|artboard.rearrange|object.envelope.makeWithWarp|object.envelope.resetWithWarp|object.envelope.makeWithMesh|object.envelope.resetWithMesh|object.envelope.options} open the dialog that command's menu item opens (dialog kind: move, rotate, scale, reflect, shear, transformEach, …, vectorHalftone, rearrangeArtboards, envelopeWarp, envelopeMesh, envelopeOptions; Scale and Transform Each have `corners` and `strokes`, from the preferences, which OK updates; Transform Each opens on the values it was last confirmed with (not `copy`), and its Copy button confirms with `copy: true`; the envelope dialogs start from the selected envelope, Make opens as Reset (`reset: true`) while one is selected)",
+        "{command: object.move|object.rotate|object.scale|object.reflect|object.shear|object.transformEach|path.average|object.path.offsetPath|object.path.simplify|object.path.smooth|object.path.splitIntoGrid|object.vectorHalftone|artboard.rearrange|object.envelope.makeWithWarp|object.envelope.resetWithWarp|object.envelope.makeWithMesh|object.envelope.resetWithMesh|object.envelope.options} open the dialog that command's menu item opens (dialog kind: move, rotate, scale, reflect, shear, transformEach, …, vectorHalftone, rearrangeArtboards, envelopeWarp, envelopeMesh, envelopeOptions; Scale and Transform Each have `corners` and `strokes`, from the preferences, which OK updates; Transform Each opens on the values it was last confirmed with (not `copy`), and its Copy button confirms with `copy: true`; the envelope dialogs start from the selected envelope, Make opens as Reset (`reset: true`) while one is selected)",
     ),
     (
         "ui.widthPointEdit",
@@ -857,6 +857,12 @@ pub const UI_COMMANDS: &[(&str, &str, &str, &str)] = &[
         "Auto-Simplify",
         "",
         "{} the open Simplify slider (Object › Path › Simplify opens it: dialog `simplifySlider` with field `level` 0..100, object.path.simplify's level, opening at the level object.path.simplify {auto: true} picks for the selection, previewed on the canvas until ui.dialog.confirm keeps it as one undo step; after OK in the Simplify dialog with `retain` ticked, the menu item opens the dialog `simplify` with the fields of that OK instead) moves to the level object.path.simplify {auto: true} picks for the selection and previews it → {level}; an error when the slider isn't open",
+    ),
+    (
+        "ui.smoothAuto",
+        "Auto-Smooth",
+        "",
+        "{} the open Smooth slider (Object › Path › Smooth opens it: dialog `smoothSlider` with field `level` 0..100, object.path.smooth's level, opening at the level object.path.smooth {auto: true} picks, previewed on the canvas until ui.dialog.confirm keeps it as one undo step) moves to the level object.path.smooth {auto: true} picks and previews it → {level}; an error when the slider isn't open",
     ),
     (
         "ui.simplifyMoreOptions",

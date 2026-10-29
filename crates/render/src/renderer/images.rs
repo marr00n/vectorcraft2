@@ -29,8 +29,31 @@ impl Renderer {
         // pixelated image is drawn from its full pixels: a mip averages them.
         let mips = f.opts.image_mips && !pixelated;
         let unit = f.view * im.xf * Affine::scale_non_uniform(im.width as f64, im.height as f64);
+        // With `kept_images_only`, an image still to be decoded: it draws as a light box, not as
+        // an undecoded image.
+        let mut pending = false;
         let shown = if outline && !f.doc.setup.outline_images {
             None
+        } else if f.opts.kept_images_only {
+            let kept = self.nearest_kept(f, &im.key, im.pixels.as_deref(), outline, unit);
+            pending = kept.is_none() && !self.noted_undecodable(f.doc, &im.key, im.pixels.as_deref());
+            if pending {
+                // Not decoded: a light box where the image will be, as a placed document's
+                // bitmap shows while it is made (`placed_document`).
+                ctx.set_paint(f.ink.fixed([128, 128, 128, 40]));
+                match area {
+                    Some((bp, rule)) => {
+                        ctx.set_transform(f.view);
+                        ctx.set_fill_rule(fill_rule(*rule));
+                        ctx.fill_path(bp);
+                    }
+                    None => {
+                        ctx.set_transform(f.view * im.xf);
+                        ctx.fill_rect(&rect);
+                    }
+                }
+            }
+            kept
         } else if let Some(pm) = mips.then(|| self.kept_mip(f, &im.key, im.pixels.as_deref(), outline, unit)).flatten() {
             Some(pm)
         } else {
@@ -74,7 +97,7 @@ impl Renderer {
                     }
                 }
             }
-        } else if f.opts.mark_undecoded_images && (!outline || f.doc.setup.outline_images) {
+        } else if f.opts.mark_undecoded_images && !pending && (!outline || f.doc.setup.outline_images) {
             self.draw_undecoded_mark(ctx, f, im, area);
         }
         if outline {
@@ -207,5 +230,30 @@ impl Renderer {
             return None;
         }
         images::store().get(&images::ImageKey { mip: level, ..key })
+    }
+
+    /// The pixels of image `key` (or `own`) that [`RenderOptions::kept_images_only`] draws through
+    /// `m`, in greyscale with `grey` (the outline view's): of the mips the store holds, the one
+    /// [`image_mip`] would draw, else the nearest finer one (the full pixels last), else the
+    /// nearest coarser one. `None` when the store holds none. Nothing is marked used.
+    fn nearest_kept(&self, f: &Frame, key: &str, own: Option<&vectorcraft_doc::ImageBlob>, grey: bool, m: Affine) -> Option<Arc<Pixmap>> {
+        let (key, (w, h)) = self.image_key(f.doc, key, own, grey)?;
+        let key = if grey { key } else { ink::ink_key(&key, f.ink) };
+        let level = mip_level(m, w, h);
+        let s = images::store();
+        let at = |l: u8| s.peek(&images::ImageKey { mip: l, ..key.clone() });
+        (0..=level).rev().find_map(at).or_else(|| (level + 1..=16).find_map(at))
+    }
+
+    /// Whether the shared store notes image `key` (or `own`), or the image an adjusted image is
+    /// made from, as one whose pixels can't be decoded. Nothing is decoded.
+    fn noted_undecodable(&self, doc: &Document, key: &str, own: Option<&vectorcraft_doc::ImageBlob>) -> bool {
+        match own.or_else(|| doc.images.get(key)) {
+            Some(blob) => {
+                let content = blob_key(blob).0.content;
+                images::store().is_undecodable(&content)
+            }
+            None => self.adjusts.get(key).is_some_and(|(src, ..)| self.noted_undecodable(doc, src, None)),
+        }
     }
 }

@@ -2950,6 +2950,7 @@ font-technology	Variable	Променливи
 	Show Original Path	Показване на оригиналния път
 	Open this dialog with these settings next time	Отваряне на този прозорец с тези настройки следващия път
 	Auto-Simplify	Автоматично опростяване
+	Auto-Smooth	Автоматично изглаждане
 	Show Package	Показване на пакет
 	Show Panel	Показване на панел
 	Show Pattern Swatches	Показване на образци за мостра
@@ -2984,6 +2985,7 @@ font-technology	Variable	Променливи
 	Simplify	Опростяване
 	Simplify:	Опростяване:
 	Simplify…	Опростяване…
+	Smooth…	Изглаждане…
 	Simulate Colored Paper	Симулиране на цветна хартия
 	Simulate Paper	Симулиране на хартия
 	Double Column	Две колони
@@ -3979,6 +3981,7 @@ axis	Both	И двете
 @msg	missing `id` (see plugin.list)	липсва `id` (вижте plugin.list)
 @msg	missing `name`	липсва `name`
 @msg	missing `tool`	липсва `tool`
+@msg	missing id	липсва id
 @msg	missing index	липсва индекс
 @msg	missing number `{key}`	липсва число `{key}`
 @msg	missing integer `{key}`	липсва цяло число `{key}`
@@ -4213,6 +4216,9 @@ axis	Both	И двете
 @msg	the layer or group is locked	слойът или групата са заключени
 @msg	the guide is on a hidden or locked layer	водачът е в скрит или заключен слой
 @msg	the target layer is locked or hidden	целевият слой е заключен или скрит
+@msg	the object is hidden or locked	обектът е скрит или заключен
+@msg	the object is outside the isolated group	обектът е извън изолираната група
+@msg	type objects can't be isolated	текстовите обекти не могат да бъдат изолирани
 @msg	the layer to flatten into is hidden	слоят, в който се сплесква, е скрит
 @msg	the object already has an opacity mask	обектите вече имат маска за непрозрачност
 @msg	the object has no geometry	обектът няма геометрия
